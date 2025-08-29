@@ -248,7 +248,6 @@ jobs:
         run: |
           set -e
           APPIMG_ARMV7L=$(ls dist/*armv7l*.AppImage 2>/dev/null | head -n1 || true)
-          DEB_ARMV7L=$(ls dist/*.armv7l.deb dist/*_armhf.deb 2>/dev/null | head -n1 || true)
           
           for f in "$APPIMG_ARMV7L" "$DEB_ARMV7L"; do
             if [ -n "$f" ] && [ -f "$f" ]; then
@@ -261,9 +260,7 @@ jobs:
         run: |
           BASE="${{ env.PUBLIC_BASE_URL }}/${{ env.VERSION }}${{ env.BUILD_TAG }}"
           APPIMG_ARMV7L=$(ls dist/*armv7l*.AppImage 2>/dev/null | xargs -n1 -I{} basename "{}" | head -n1 || echo "")
-          DEB_ARMV7L=$(ls dist/*.armv7l.deb dist/*_armhf.deb 2>/dev/null | xargs -n1 -I{} basename "{}" | head -n1 || echo "")
           [ -n "$APPIMG_ARMV7L" ] && echo "ARM7_APPIMG_URL=$BASE/$APPIMG_ARMV7L" >> $GITHUB_OUTPUT
-          [ -n "$DEB_ARMV7L" ] && echo "ARM7_DEB_URL=$BASE/$DEB_ARMV7L" >> $GITHUB_OUTPUT
   raspi-arm64:
     name: Build & Upload — Raspberry Pi (arm64)
     runs-on: ubuntu-latest
@@ -323,9 +320,7 @@ jobs:
         run: |
           BASE="${{ env.PUBLIC_BASE_URL }}/${{ env.VERSION }}${{ env.BUILD_TAG }}"
           APPIMG_ARM64=$(ls dist/*arm64*.AppImage 2>/dev/null | xargs -n1 -I{} basename "{}" | head -n1 || echo "")
-          DEB_ARM64=$(ls dist/*arm64*.deb 2>/dev/null | xargs -n1 -I{} basename "{}" | head -n1 || echo "")
           [ -n "$APPIMG_ARM64" ] && echo "ARM64_APPIMG_URL=$BASE/$APPIMG_ARM64" >> $GITHUB_OUTPUT
-          [ -n "$DEB_ARM64" ] && echo "ARM64_DEB_URL=$BASE/$DEB_ARM64" >> $GITHUB_OUTPUT
           
   build-macos:
     name: Build & Upload — macOS
