@@ -102,11 +102,14 @@
             "plugs": [
                 "network",
                 "x11",
+                "wayland",
                 "unity7",
                 "pulseaudio",
                 "home",
                 "process-control",
-                "system-observe"
+                "system-observe",
+                "desktop",
+                "desktop-legacy"
             ],
             "environment": {
                 "DISCORD_RPC_ENABLE": "1",
@@ -135,10 +138,11 @@
             ],
             "finishArgs": [
                 "--share=ipc",
-                "--filesystem=host",
+                "--filesystem=home",
                 "--talk-name=org.freedesktop.Flatpak",
                 "--talk-name=com.discord.Discord",
                 "--socket=fallback-x11",
+                "--socket=wayland",
                 "--socket=pulseaudio",
                 "--device=dri"
             ]
