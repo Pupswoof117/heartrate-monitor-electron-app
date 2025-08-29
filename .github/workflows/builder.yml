@@ -211,7 +211,7 @@ jobs:
       ARM7_APPIMG_URL: ${{ steps.links.outputs.ARM7_APPIMG_URL }}
       ARM7_DEB_URL: ${{ steps.links.outputs.ARM7_DEB_URL }}
     steps:
-      - name: actions/checkout@v4
+      - uses: actions/checkout@v4
       - uses: docker/setup-qemu-action@v3
       - uses: uraimo/run-on-arch-action@v2
         with:
