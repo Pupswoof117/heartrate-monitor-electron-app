@@ -452,24 +452,24 @@ jobs:
 
           downloads=""
           # Windows
-          [ -n "${WIN_EXE_URL}" ] && downloads="${downloads}\n• Windows (EXE): ${WIN_EXE_URL}"
-          [ -n "${WIN_MSI_URL}" ] && downloads="${downloads}\n• Windows (MSI): ${WIN_MSI_URL}"
+          [ -n "${WIN_EXE_URL}" ] && downloads="${downloads}`n• [Windows (EXE)](${WIN_EXE_URL})"
+          [ -n "${WIN_MSI_URL}" ] && downloads="${downloads}`n• [Windows (MSI)](${WIN_MSI_URL})"
           # Linux x64
-          [ -n "${LINUX_APPIMAGE_URL}" ] && downloads="${downloads}\n• Linux x64 AppImage: ${LINUX_APPIMAGE_URL}"
-          [ -n "${LINUX_DEB_URL}" ] && downloads="${downloads}\n• Linux x64 .deb: ${LINUX_DEB_URL}"
+          [ -n "${LINUX_APPIMAGE_URL}" ] && downloads="${downloads}`n• [Linux x64 AppImage](${LINUX_APPIMAGE_URL})"
+          [ -n "${LINUX_DEB_URL}" ] && downloads="${downloads}`n• [Linux x64 .deb](${LINUX_DEB_URL})"
           # Raspberry Pi
-          [ -n "${ARM7_APPIMG_URL}" ] && downloads="${downloads}\n• Raspberry Pi ARMv7 AppImage: ${ARM7_APPIMG_URL}"
-          [ -n "${ARM64_APPIMG_URL}" ] && downloads="${downloads}\n• Raspberry Pi ARM64 AppImage: ${ARM64_APPIMG_URL}"
+          [ -n "${ARM7_APPIMG_URL}" ] && downloads="${downloads}`n• [Raspberry Pi ARMv7 AppImage](${ARM7_APPIMG_URL})"
+          [ -n "${ARM64_APPIMG_URL}" ] && downloads="${downloads}`n• [Raspberry Pi ARM64 AppImage](${ARM64_APPIMG_URL})"
           # macOS
-          [ -n "${MAC_DMG_URL}" ] && downloads="${downloads}\n• macOS DMG: ${MAC_DMG_URL}"
-          [ -n "${MAC_ZIP_URL}" ] && downloads="${downloads}\n• macOS ZIP: ${MAC_ZIP_URL}"
+          [ -n "${MAC_DMG_URL}" ] && downloads="${downloads}`n• [macOS DMG](${MAC_DMG_URL})"
+          [ -n "${MAC_ZIP_URL}" ] && downloads="${downloads}`n• [macOS ZIP](${MAC_ZIP_URL})"
 
-          [ -z "$downloads" ] && downloads="\n(No build artifacts were detected.)"
+          [ -z "$downloads" ] && downloads="`n(No build artifacts were detected.)"
 
           payload=$(jq -n \
             --arg content "<@&1384262560395559122> **UPDATE (ALL PLATFORMS)**" \
             --arg title "New Release: v${VERSION}${BUILD_TAG}" \
-            --arg desc "${RELEASE_NOTES}\n\n**Downloads**:${downloads}" \
+            --arg desc "${RELEASE_NOTES}`n`n**Downloads**:${downloads}" \
             --arg avatar "https://cdn.discordapp.com/icons/1274732053337870417/8f0b3c1852bbd3cc11a237c2d326dcb1.webp?size=1024" \
             '{
               username: "Pulsoid APP Bot",
