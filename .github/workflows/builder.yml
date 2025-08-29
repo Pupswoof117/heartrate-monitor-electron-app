@@ -1,0 +1,438 @@
+name: Build & Release (Windows, Linux, macOS, Raspberry Pi)
+
+permissions:
+  contents: write
+  issues: write
+  pull-requests: write
+
+on:
+  push:
+    branches:
+      - main
+
+env:
+  # Change these if your bucket/path changes
+  MINIO_BUCKET_PATH: myminio/nekosunetools/pulsoidapp/release
+  PUBLIC_BASE_URL: https://uploadminioger1.nekosunevr.co.uk/nekosunetools/pulsoidapp/release
+
+jobs:
+  prepare:
+    name: Prepare version + release notes
+    runs-on: ubuntu-latest
+    outputs:
+      version: ${{ steps.vars.outputs.version }}
+      build_tag: ${{ steps.vars.outputs.build_tag }}
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+
+      - name: Setup Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: 21
+
+      - name: Compute VERSION and BUILD_TAG
+        id: vars
+        run: |
+          VERSION=$(node -p 'require("./package.json").version')
+          echo "version=$VERSION" >> $GITHUB_OUTPUT
+          BUILD_TAG="-v${{ github.run_number }}"
+          echo "build_tag=$BUILD_TAG" >> $GITHUB_OUTPUT
+          echo "VERSION=$VERSION" >> $GITHUB_ENV
+          echo "BUILD_TAG=$BUILD_TAG" >> $GITHUB_ENV
+          echo "Extracted version: $VERSION"
+          echo "Build Tag: $BUILD_TAG"
+
+      - name: Generate Release Notes (Draft)
+        id: release_notes
+        uses: release-drafter/release-drafter@v6
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+        with:
+          version: ${{ env.VERSION }}
+          name: "PulsoidApp ${{ env.VERSION }}"
+          tag: ${{ env.VERSION }}
+          prerelease: true
+          header: "## Release Notes for PulsoidApp ${{ env.VERSION }}"
+
+      - name: Save release notes to file
+        run: |
+          echo "${{ steps.release_notes.outputs.body }}" > release_notes.txt
+
+      - name: Upload release notes artifact
+        uses: actions/upload-artifact@v4
+        with:
+          name: release_notes
+          path: release_notes.txt
+
+  build-windows:
+    name: Build & Upload — Windows
+    runs-on: windows-latest
+    needs: prepare
+    env:
+      VERSION: ${{ needs.prepare.outputs.version }}
+      BUILD_TAG: ${{ needs.prepare.outputs.build_tag }}
+    outputs:
+      WIN_EXE_URL: ${{ steps.links.outputs.WIN_EXE_URL }}
+      WIN_MSI_URL: ${{ steps.links.outputs.WIN_MSI_URL }}
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+
+      - name: Setup Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: 21
+          cache: 'npm'
+
+      - name: Install Dependencies
+        run: npm ci
+
+      - name: Build Electron App (Windows)
+        run: npm run build:win
+        env:
+          GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+
+      - name: List dist/
+        run: Get-ChildItem -Recurse dist
+        shell: pwsh
+
+      - name: Install mc (MinIO Client) on Windows
+        shell: powershell
+        run: |
+          Invoke-WebRequest -Uri "https://dl.min.io/client/mc/release/windows-amd64/mc.exe" -OutFile "mc.exe"
+
+      - name: Configure mc alias (Windows)
+        shell: powershell
+        run: |
+          .\mc.exe alias set myminio "${{ secrets.MINIO_ENDPOINT }}" "${{ secrets.AWS_ACCESS_KEY }}" "${{ secrets.AWS_SECRET_KEY }}"
+
+      - name: Upload Windows Installers to MinIO
+        shell: powershell
+        run: |
+          $targetPath = "${{ env.MINIO_BUCKET_PATH }}/${{ env.VERSION }}${{ env.BUILD_TAG }}/"
+          if (Test-Path "dist/PulsoidApp-Setup-${{ env.VERSION }}.msi") { .\mc.exe cp "dist/PulsoidApp-Setup-${{ env.VERSION }}.msi" "$targetPath" }
+          if (Test-Path "dist/PulsoidApp-Setup-${{ env.VERSION }}.exe") { .\mc.exe cp "dist/PulsoidApp-Setup-${{ env.VERSION }}.exe" "$targetPath" }
+
+      - name: Make Windows Download Links
+        id: links
+        shell: pwsh
+        run: |
+          $base = "${{ env.PUBLIC_BASE_URL }}/${{ env.VERSION }}${{ env.BUILD_TAG }}"
+          $msi = Test-Path "dist/PulsoidApp-Setup-${{ env.VERSION }}.msi"
+          $exe = Test-Path "dist/PulsoidApp-Setup-${{ env.VERSION }}.exe"
+          if ($msi) { "WIN_MSI_URL=$base/PulsoidApp-Setup-${{ env.VERSION }}.msi" | Out-File -FilePath $env:GITHUB_OUTPUT -Append -Encoding utf8 }
+          if ($exe) { "WIN_EXE_URL=$base/PulsoidApp-Setup-${{ env.VERSION }}.exe" | Out-File -FilePath $env:GITHUB_OUTPUT -Append -Encoding utf8 }
+
+  build-linux:
+    name: Build & Upload — Linux (x64)
+    runs-on: ubuntu-latest
+    needs: prepare
+    env:
+      VERSION: ${{ needs.prepare.outputs.version }}
+      BUILD_TAG: ${{ needs.prepare.outputs.build_tag }}
+    outputs:
+      LINUX_APPIMAGE_URL: ${{ steps.links.outputs.LINUX_APPIMAGE_URL }}
+      LINUX_DEB_URL: ${{ steps.links.outputs.LINUX_DEB_URL }}
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+
+      - name: Setup Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: 21
+          cache: 'npm'
+
+      - name: Install Dependencies
+        run: npm ci
+
+      - name: Install build deps
+        run: |
+          sudo apt-get update
+          sudo apt-get install -y libfuse2 jq
+
+      - name: Build Electron App (Linux x64)
+        run: npm run build:linux
+        env:
+          GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+
+      - name: List dist/
+        run: ls -R dist
+
+      - name: Install mc (MinIO Client) on Linux
+        run: |
+          curl -L "https://dl.min.io/client/mc/release/linux-amd64/mc" -o mc
+          chmod +x mc
+          ./mc --version
+
+      - name: Configure mc alias
+        run: |
+          ./mc alias set myminio "${{ secrets.MINIO_ENDPOINT }}" "${{ secrets.AWS_ACCESS_KEY }}" "${{ secrets.AWS_SECRET_KEY }}"
+
+      - name: Upload Linux x64 Artifacts
+        env:
+          TARGET_PREFIX: ${{ env.MINIO_BUCKET_PATH }}/${{ env.VERSION }}${{ env.BUILD_TAG }}/
+        run: |
+          set -e
+          APPIMG_X64=$(ls dist/*x86_64*.AppImage 2>/dev/null | head -n1 || true)
+          DEB_X64=$(ls dist/*amd64*.deb 2>/dev/null | head -n1 || true)
+          for f in "$APPIMG_X64" "$DEB_X64"; do
+            if [ -n "$f" ] && [ -f "$f" ]; then
+              ./mc cp "$f" "$TARGET_PREFIX"
+            fi
+          done
+
+      - name: Compose Download Links (Linux x64)
+        id: links
+        run: |
+          BASE="${{ env.PUBLIC_BASE_URL }}/${{ env.VERSION }}${{ env.BUILD_TAG }}"
+          APPIMG_X64=$(ls dist/*x86_64*.AppImage 2>/dev/null | xargs -n1 -I{} basename "{}" | head -n1 || echo "")
+          DEB_X64=$(ls dist/*amd64*.deb 2>/dev/null | xargs -n1 -I{} basename "{}" | head -n1 || echo "")
+          [ -n "$APPIMG_X64" ] && echo "LINUX_APPIMAGE_URL=$BASE/$APPIMG_X64" >> $GITHUB_OUTPUT
+          [ -n "$DEB_X64" ] && echo "LINUX_DEB_URL=$BASE/$DEB_X64" >> $GITHUB_OUTPUT
+
+  build-raspi:
+    name: Build & Upload — Raspberry Pi (armv7/arm64)
+    runs-on: ubuntu-latest
+    needs: prepare
+    env:
+      VERSION: ${{ needs.prepare.outputs.version }}
+      BUILD_TAG: ${{ needs.prepare.outputs.build_tag }}
+    outputs:
+      ARM7_APPIMG_URL: ${{ steps.links.outputs.ARM7_APPIMG_URL }}
+      ARM7_DEB_URL: ${{ steps.links.outputs.ARM7_DEB_URL }}
+      ARM64_APPIMG_URL: ${{ steps.links.outputs.ARM64_APPIMG_URL }}
+      ARM64_DEB_URL: ${{ steps.links.outputs.ARM64_DEB_URL }}
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+
+      - name: Setup Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: 21
+          cache: 'npm'
+
+      - name: Install Dependencies
+        run: npm ci
+
+      - name: Install build deps
+        run: |
+          sudo apt-get update
+          sudo apt-get install -y libfuse2 jq
+
+      - name: Build Electron App (Raspberry Pi)
+        run: npm run build:pi
+        env:
+          GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+
+      - name: List dist/
+        run: ls -R dist
+
+      - name: Install mc (MinIO Client) on Linux
+        run: |
+          curl -L "https://dl.min.io/client/mc/release/linux-amd64/mc" -o mc
+          chmod +x mc
+          ./mc --version
+
+      - name: Configure mc alias
+        run: |
+          ./mc alias set myminio "${{ secrets.MINIO_ENDPOINT }}" "${{ secrets.AWS_ACCESS_KEY }}" "${{ secrets.AWS_SECRET_KEY }}"
+
+      - name: Upload Raspberry Pi Artifacts
+        env:
+          TARGET_PREFIX: ${{ env.MINIO_BUCKET_PATH }}/${{ env.VERSION }}${{ env.BUILD_TAG }}/
+        run: |
+          set -e
+          APPIMG_ARMV7L=$(ls dist/*armv7l*.AppImage 2>/dev/null | head -n1 || true)
+          DEB_ARMV7L=$(ls dist/*.armv7l.deb dist/*_armhf.deb 2>/dev/null | head -n1 || true)
+          APPIMG_ARM64=$(ls dist/*arm64*.AppImage 2>/dev/null | head -n1 || true)
+          DEB_ARM64=$(ls dist/*arm64*.deb 2>/dev/null | head -n1 || true)
+
+          for f in "$APPIMG_ARMV7L" "$DEB_ARMV7L" "$APPIMG_ARM64" "$DEB_ARM64"; do
+            if [ -n "$f" ] && [ -f "$f" ]; then
+              ./mc cp "$f" "$TARGET_PREFIX"
+            fi
+          done
+
+      - name: Compose Download Links (Raspberry Pi)
+        id: links
+        run: |
+          BASE="${{ env.PUBLIC_BASE_URL }}/${{ env.VERSION }}${{ env.BUILD_TAG }}"
+          APPIMG_ARMV7L=$(ls dist/*armv7l*.AppImage 2>/dev/null | xargs -n1 -I{} basename "{}" | head -n1 || echo "")
+          DEB_ARMV7L=$(ls dist/*.armv7l.deb dist/*_armhf.deb 2>/dev/null | xargs -n1 -I{} basename "{}" | head -n1 || echo "")
+          APPIMG_ARM64=$(ls dist/*arm64*.AppImage 2>/dev/null | xargs -n1 -I{} basename "{}" | head -n1 || echo "")
+          DEB_ARM64=$(ls dist/*arm64*.deb 2>/dev/null | xargs -n1 -I{} basename "{}" | head -n1 || echo "")
+          [ -n "$APPIMG_ARMV7L" ] && echo "ARM7_APPIMG_URL=$BASE/$APPIMG_ARMV7L" >> $GITHUB_OUTPUT
+          [ -n "$DEB_ARMV7L" ] && echo "ARM7_DEB_URL=$BASE/$DEB_ARMV7L" >> $GITHUB_OUTPUT
+          [ -n "$APPIMG_ARM64" ] && echo "ARM64_APPIMG_URL=$BASE/$APPIMG_ARM64" >> $GITHUB_OUTPUT
+          [ -n "$DEB_ARM64" ] && echo "ARM64_DEB_URL=$BASE/$DEB_ARM64" >> $GITHUB_OUTPUT
+
+  build-macos:
+    name: Build & Upload — macOS
+    runs-on: macos-latest
+    needs: prepare
+    env:
+      VERSION: ${{ needs.prepare.outputs.version }}
+      BUILD_TAG: ${{ needs.prepare.outputs.build_tag }}
+    outputs:
+      MAC_DMG_URL: ${{ steps.links.outputs.MAC_DMG_URL }}
+      MAC_ZIP_URL: ${{ steps.links.outputs.MAC_ZIP_URL }}
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+
+      - name: Setup Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: 21
+          cache: 'npm'
+
+      - name: Install Dependencies
+        run: npm ci
+
+      - name: Build Electron App (macOS)
+        run: npm run build:mac
+        env:
+          GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+          # Add Apple notarization vars if you have them; otherwise unsigned DMG/zip will still build.
+
+      - name: List dist/
+        run: ls -R dist
+
+      - name: Install mc (MinIO Client) on macOS
+        run: |
+          ARCH=$(uname -m)
+          if [ "$ARCH" = "arm64" ]; then
+            URL="https://dl.min.io/client/mc/release/darwin-arm64/mc"
+          else
+            URL="https://dl.min.io/client/mc/release/darwin-amd64/mc"
+          fi
+          curl -L "$URL" -o mc
+          chmod +x mc
+          ./mc --version
+
+      - name: Configure mc alias
+        run: |
+          ./mc alias set myminio "${{ secrets.MINIO_ENDPOINT }}" "${{ secrets.AWS_ACCESS_KEY }}" "${{ secrets.AWS_SECRET_KEY }}"
+
+      - name: Upload macOS Artifacts
+        env:
+          TARGET_PREFIX: ${{ env.MINIO_BUCKET_PATH }}/${{ env.VERSION }}${{ env.BUILD_TAG }}/
+        run: |
+          set -e
+          DMG=$(ls dist/*.dmg 2>/dev/null | head -n1 || true)
+          ZIP=$(ls dist/*.zip 2>/dev/null | head -n1 || true)
+          for f in "$DMG" "$ZIP"; do
+            if [ -n "$f" ] && [ -f "$f" ]; then
+              ./mc cp "$f" "$TARGET_PREFIX"
+            fi
+          done
+
+      - name: Compose Download Links (macOS)
+        id: links
+        run: |
+          BASE="${{ env.PUBLIC_BASE_URL }}/${{ env.VERSION }}${{ env.BUILD_TAG }}"
+          DMG=$(ls dist/*.dmg 2>/dev/null | xargs -n1 -I{} basename "{}" | head -n1 || echo "")
+          ZIP=$(ls dist/*.zip 2>/dev/null | xargs -n1 -I{} basename "{}" | head -n1 || echo "")
+          [ -n "$DMG" ] && echo "MAC_DMG_URL=$BASE/$DMG" >> $GITHUB_OUTPUT
+          [ -n "$ZIP" ] && echo "MAC_ZIP_URL=$BASE/$ZIP" >> $GITHUB_OUTPUT
+
+  notify:
+    name: Upload notes + Send ONE Discord message
+    runs-on: ubuntu-latest
+    needs:
+      - prepare
+      - build-windows
+      - build-linux
+      - build-raspi
+      - build-macos
+    env:
+      VERSION: ${{ needs.prepare.outputs.version }}
+      BUILD_TAG: ${{ needs.prepare.outputs.build_tag }}
+      # Windows
+      WIN_EXE_URL: ${{ needs.build-windows.outputs.WIN_EXE_URL }}
+      WIN_MSI_URL: ${{ needs.build-windows.outputs.WIN_MSI_URL }}
+      # Linux x64
+      LINUX_APPIMAGE_URL: ${{ needs.build-linux.outputs.LINUX_APPIMAGE_URL }}
+      LINUX_DEB_URL: ${{ needs.build-linux.outputs.LINUX_DEB_URL }}
+      # Raspberry Pi
+      ARM7_APPIMG_URL: ${{ needs.build-raspi.outputs.ARM7_APPIMG_URL }}
+      ARM7_DEB_URL: ${{ needs.build-raspi.outputs.ARM7_DEB_URL }}
+      ARM64_APPIMG_URL: ${{ needs.build-raspi.outputs.ARM64_APPIMG_URL }}
+      ARM64_DEB_URL: ${{ needs.build-raspi.outputs.ARM64_DEB_URL }}
+      # macOS
+      MAC_DMG_URL: ${{ needs.build-macos.outputs.MAC_DMG_URL }}
+      MAC_ZIP_URL: ${{ needs.build-macos.outputs.MAC_ZIP_URL }}
+    steps:
+      - name: Download release notes artifact
+        uses: actions/download-artifact@v4
+        with:
+          name: release_notes
+          path: .
+
+      - name: Show release notes
+        run: |
+          echo "----- RELEASE NOTES -----"
+          cat release_notes.txt || true
+          echo "-------------------------"
+
+      - name: Install mc (MinIO Client) on Linux
+        run: |
+          curl -L "https://dl.min.io/client/mc/release/linux-amd64/mc" -o mc
+          chmod +x mc
+          ./mc --version
+
+      - name: Configure mc alias
+        run: |
+          ./mc alias set myminio "${{ secrets.MINIO_ENDPOINT }}" "${{ secrets.AWS_ACCESS_KEY }}" "${{ secrets.AWS_SECRET_KEY }}"
+
+      - name: Upload release notes to MinIO
+        run: |
+          ./mc cp release_notes.txt "${{ env.MINIO_BUCKET_PATH }}/${{ env.VERSION }}${{ env.BUILD_TAG }}/release_notes.txt"
+
+      - name: Compose ONE Discord payload and send
+        env:
+          DISCORD_WEBHOOK: ${{ secrets.DISCORD_WEBHOOK }}
+        run: |
+          set -e
+          RELEASE_NOTES=$(cat release_notes.txt)
+
+          downloads=""
+          # Windows
+          [ -n "${WIN_EXE_URL}" ] && downloads="${downloads}\n• Windows (EXE): ${WIN_EXE_URL}"
+          [ -n "${WIN_MSI_URL}" ] && downloads="${downloads}\n• Windows (MSI): ${WIN_MSI_URL}"
+          # Linux x64
+          [ -n "${LINUX_APPIMAGE_URL}" ] && downloads="${downloads}\n• Linux x64 AppImage: ${LINUX_APPIMAGE_URL}"
+          [ -n "${LINUX_DEB_URL}" ] && downloads="${downloads}\n• Linux x64 .deb: ${LINUX_DEB_URL}"
+          # Raspberry Pi
+          [ -n "${ARM7_APPIMG_URL}" ] && downloads="${downloads}\n• Raspberry Pi ARMv7 AppImage: ${ARM7_APPIMG_URL}"
+          [ -n "${ARM7_DEB_URL}" ] && downloads="${downloads}\n• Raspberry Pi ARMv7 .deb: ${ARM7_DEB_URL}"
+          [ -n "${ARM64_APPIMG_URL}" ] && downloads="${downloads}\n• Raspberry Pi ARM64 AppImage: ${ARM64_APPIMG_URL}"
+          [ -n "${ARM64_DEB_URL}" ] && downloads="${downloads}\n• Raspberry Pi ARM64 .deb: ${ARM64_DEB_URL}"
+          # macOS
+          [ -n "${MAC_DMG_URL}" ] && downloads="${downloads}\n• macOS DMG: ${MAC_DMG_URL}"
+          [ -n "${MAC_ZIP_URL}" ] && downloads="${downloads}\n• macOS ZIP: ${MAC_ZIP_URL}"
+
+          [ -z "$downloads" ] && downloads="\n(No build artifacts were detected.)"
+
+          payload=$(jq -n \
+            --arg content "<@&1384262560395559122> **UPDATE (ALL PLATFORMS)**" \
+            --arg title "New Release: v${VERSION}${BUILD_TAG}" \
+            --arg desc "${RELEASE_NOTES}\n\n**Downloads**:${downloads}" \
+            --arg avatar "https://cdn.discordapp.com/icons/1274732053337870417/8f0b3c1852bbd3cc11a237c2d326dcb1.webp?size=1024" \
+            '{
+              username: "Pulsoid APP Bot",
+              avatar_url: $avatar,
+              content: $content,
+              embeds: [{
+                title: $title,
+                description: $desc,
+                color: 16776960,
+                footer: { text: "Released by GitHub Actions" },
+                timestamp: (now | todate)
+              }]
+            }')
+
+          curl -sS -X POST -H "Content-Type: application/json" -d "$payload" "$DISCORD_WEBHOOK"

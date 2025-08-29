@@ -1,7 +1,10 @@
 {
     "name": "pulsoid-electron",
     "version": "1.0.0",
-    "author": "NekoSuneVR",
+    "author": {
+        "name": "NekoSuneVR",
+        "email": "nekosunevr@hyperiontv.net"
+    },
     "license": "MIT",
     "description": "PulsoidApp is Program use Pulsoid With Discord RPC and Dashboard on App with Overlay can use on OBS",
     "main": "main.js",
@@ -9,12 +12,16 @@
         "start": "electron .",
         "build": "electron-builder",
         "build:win": "electron-builder --win",
-        "test": "echo \"Error: no test specified\" && exit 1"
+        "build:mac": "electron-builder --mac",
+        "build:linux": "electron-builder --linux --x64",
+        "build:pi": "electron-builder --linux --armv7l --arm64",
+        "build:snap": "electron-builder --linux snap"
     },
     "build": {
         "copyright": "Copyright © 2024-2025 NekoSuneVR",
         "appId": "com.nekosunevr.pulsoidapp",
         "productName": "PulsoidApp",
+        "asar": true,
         "appx": {
             "backgroundColor": "#ffffff",
             "displayName": "PulsoidApp",
@@ -49,11 +56,96 @@
                 "node_modules/**/*"
             ]
         },
-        "nsis": {
-            "allowToChangeInstallationDirectory": true,
-            "license": "LICENSE",
-            "oneClick": false
+        "mac": {
+            "artifactName": "${productName}-Setup-${version}.${ext}",
+            "target": [
+                "dmg",
+                "zip"
+            ],
+            "category": "public.app-category.healthcare-fitness",
+            "icon": "assets/icon.icns",
+            "files": [
+                "main.js",
+                "preload.js",
+                "LICENSE",
+                "README.md",
+                "CHANGELOG.md",
+                "assets/**/*",
+                "src/**/*",
+                "package.json",
+                "node_modules/**/*"
+            ]
+        },
+        "linux": {
+            "artifactName": "${productName}-${version}.${ext}",
+            "category": "Utility",
+            "maintainer": "NekoSuneVR",
+            "icon": "assets/icon.png",
+            "synopsis": "Pulsoid with Discord RPC and overlay dashboard",
+            "description": "PulsoidApp brings Pulsoid with Discord Rich Presence and an in-app dashboard with an OBS-friendly overlay.",
+            "files": [
+                "main.js",
+                "preload.js",
+                "LICENSE",
+                "README.md",
+                "CHANGELOG.md",
+                "assets/**/*",
+                "src/**/*",
+                "package.json",
+                "node_modules/**/*"
+            ],
+            "target": [
+                {
+                  "target": "deb",
+                  "arch": ["armv7l", "arm64", "x64"]
+                },
+                {
+                  "target": "AppImage",
+                  "arch": ["armv7l", "arm64", "x64"]
+                },
+                "snap"
+            ]
+        },
+        "snap": {
+            "confinement": "strict",
+            "grade": "stable",
+            "summary": "PulsoidApp integrates Pulsoid with Discord RPC, a dashboard app for OBS.",
+            "description": "PulsoidApp is used with Pulsoid, offering OBS overlays, Discord RPC integration, and easy usage within a single application.",
+            "plugs": [
+                "network",
+                "x11",
+                "wayland",
+                "unity7",
+                "pulseaudio",
+                "home",
+                "process-control",
+                "system-observe",
+                "desktop",
+                "desktop-legacy"
+            ],
+            "environment": {
+                "DISCORD_RPC_ENABLE": "1",
+                "ELECTRON_DISABLE_SECURITY_WARNINGS": "1"
+            }
+        },
+        "deb": {
+            "priority": "optional",
+            "depends": [
+                "libgtk-3-0",
+                "libnss3",
+                "libxss1",
+                "libasound2",
+                "libatk-bridge2.0-0",
+                "libdrm2",
+                "libgbm1"
+            ]
         }
+    },
+
+    "nsis": {
+        "allowToChangeInstallationDirectory": true,
+        "license": "LICENSE",
+        "oneClick": false
     },
     "dependencies": {
         "discord-rpc": "^4.0.1",
