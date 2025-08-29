@@ -14,8 +14,8 @@
     "build:win": "electron-builder --win --publish=never",
     "build:mac": "electron-builder --mac --publish=never",
     "build:linux:x64": "electron-builder -l AppImage deb --x64 --publish=never",
-    "build:pi:v7": "electron-builder -l AppImage deb --armv7l --publish=never",
-    "build:pi:aarch64": "electron-builder -l AppImage deb --arm64 --publish=never",
+    "build:pi:v7": "electron-builder -l AppImage --armv7l --publish=never",
+    "build:pi:aarch64": "electron-builder -l AppImage --arm64 --publish=never",
     "build:snap": "electron-builder --linux snap --publish=never"
   },
   "build": {
