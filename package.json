@@ -2,8 +2,8 @@
     "name": "pulsoid-electron",
     "version": "1.0.0",
     "author": {
-     "name": "NekoSuneVR",
-     "email": "nekosunevr@hyperiontv.net"
+        "name": "NekoSuneVR",
+        "email": "nekosunevr@hyperiontv.net"
     },
     "license": "MIT",
     "description": "PulsoidApp is Program use Pulsoid With Discord RPC and Dashboard on App with Overlay can use on OBS",
@@ -14,12 +14,14 @@
         "build:win": "electron-builder --win",
         "build:mac": "electron-builder --mac",
         "build:linux": "electron-builder --linux --x64",
+        "build:pi": "electron-builder --linux --armv7l --arm64",
         "build:snap": "electron-builder --linux snap"
     },
     "build": {
         "copyright": "Copyright © 2024-2025 NekoSuneVR",
         "appId": "com.nekosunevr.pulsoidapp",
         "productName": "PulsoidApp",
+        "asar": true,
         "appx": {
             "backgroundColor": "#ffffff",
             "displayName": "PulsoidApp",
@@ -77,7 +79,10 @@
         "linux": {
             "artifactName": "${productName}-${version}.${ext}",
             "category": "Utility",
+            "maintainer": "NekoSuneVR",
             "icon": "assets/icon.png",
+            "synopsis": "Pulsoid with Discord RPC and overlay dashboard",
+            "description": "PulsoidApp brings Pulsoid with Discord Rich Presence and an in-app dashboard with an OBS-friendly overlay.",
             "files": [
                 "main.js",
                 "preload.js",
@@ -90,8 +95,14 @@
                 "node_modules/**/*"
             ],
             "target": [
-                "appimage",
-                "deb",
+                {
+                  "target": "deb",
+                  "arch": ["armv7l", "arm64", "x64"]
+                },
+                {
+                  "target": "AppImage",
+                  "arch": ["armv7l", "arm64", "x64"]
+                },
                 "snap"
             ]
         },
@@ -116,14 +127,26 @@
                 "DISCORD_RPC_ENABLE": "1",
                 "ELECTRON_DISABLE_SECURITY_WARNINGS": "1"
             }
+        },
+        "deb": {
+            "priority": "optional",
+            "depends": [
+                "libgtk-3-0",
+                "libnss3",
+                "libxss1",
+                "libasound2",
+                "libatk-bridge2.0-0",
+                "libdrm2",
+                "libgbm1"
+            ]
         }
     },
 
-        "nsis": {
-            "allowToChangeInstallationDirectory": true,
-            "license": "LICENSE",
-            "oneClick": false
-        },
+    "nsis": {
+        "allowToChangeInstallationDirectory": true,
+        "license": "LICENSE",
+        "oneClick": false
+    },
     "dependencies": {
         "discord-rpc": "^4.0.1",
         "electron-store": "^7.0.3",
