@@ -454,7 +454,7 @@ jobs:
 
           JSON_PAYLOAD=$(jq -n \
             --arg content "<@&1384262560395559122> **UPDATE (ALL PLATFORMS)**" \
-            --arg title "New Release: v${{ VERSION }}" \
+            --arg title "New Release: v${{ needs.prepare.outputs.version }}" \
             --arg description "$RELEASE_NOTES\n\n**Available Artifacts:**\n$LINKS" \
             --argjson color 65280 \
             --arg footer "Released by GitHub Actions" \
