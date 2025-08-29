@@ -1,159 +1,154 @@
 {
-    "name": "pulsoid-electron",
-    "version": "1.0.0",
-    "author": {
-        "name": "NekoSuneVR",
-        "email": "nekosunevr@hyperiontv.net"
+  "name": "pulsoid-electron",
+  "version": "1.0.0",
+  "author": {
+    "name": "NekoSuneVR",
+    "email": "nekosunevr@hyperiontv.net"
+  },
+  "license": "MIT",
+  "description": "PulsoidApp is Program use Pulsoid With Discord RPC and Dashboard on App with Overlay can use on OBS",
+  "main": "main.js",
+  "scripts": {
+    "start": "electron .",
+    "build": "electron-builder",
+    "build:win": "electron-builder --win --publish=never",
+    "build:mac": "electron-builder --mac --publish=never",
+    "build:linux:x64": "electron-builder -l AppImage deb --x64 --publish=never",
+    "build:pi:v7": "electron-builder -l AppImage deb --armv7l --publish=never",
+    "build:pi:aarch64": "electron-builder -l AppImage deb --arm64 --publish=never",
+    "build:snap": "electron-builder --linux snap --publish=never"
+  },
+  "build": {
+    "copyright": "Copyright © 2024-2025 NekoSuneVR",
+    "appId": "com.nekosunevr.pulsoidapp",
+    "productName": "PulsoidApp",
+    "asar": true,
+    "appx": {
+      "backgroundColor": "#ffffff",
+      "displayName": "PulsoidApp",
+      "publisher": "CN=NekoSuneVR",
+      "publisherDisplayName": "NekoSuneVR",
+      "identityName": "com.nekosunevr.pulsoidapp"
     },
-    "license": "MIT",
-    "description": "PulsoidApp is Program use Pulsoid With Discord RPC and Dashboard on App with Overlay can use on OBS",
-    "main": "main.js",
-    "scripts": {
-        "start": "electron .",
-        "build": "electron-builder",
-        "build:win": "electron-builder --win",
-        "build:mac": "electron-builder --mac",
-        "build:linux": "electron-builder --linux --x64",
-        "build:pi": "electron-builder --linux --armv7l --arm64",
-        "build:snap": "electron-builder --linux snap"
+    "directories": {
+      "output": "dist",
+      "buildResources": "assets"
     },
-    "build": {
-        "copyright": "Copyright © 2024-2025 NekoSuneVR",
-        "appId": "com.nekosunevr.pulsoidapp",
-        "productName": "PulsoidApp",
-        "asar": true,
-        "appx": {
-            "backgroundColor": "#ffffff",
-            "displayName": "PulsoidApp",
-            "publisher": "CN=NekoSuneVR",
-            "publisherDisplayName": "NekoSuneVR",
-            "identityName": "com.nekosunevr.pulsoidapp"
-        },
-        "directories": {
-            "output": "dist",
-            "buildResources": "assets"
-        },
-        "files": [
-            "**/*",
-            "!node_modules/.cache"
-        ],
-        "win": {
-            "artifactName": "${productName}-Setup-${version}.${ext}",
-            "target": [
-                "nsis",
-                "msi"
-            ],
-            "icon": "assets/icon.ico",
-            "files": [
-                "main.js",
-                "preload.js",
-                "LICENSE",
-                "README.md",
-                "CHANGELOG.md",
-                "assets/**/*",
-                "src/**/*",
-                "package.json",
-                "node_modules/**/*"
-            ]
-        },
-        "mac": {
-            "artifactName": "${productName}-Setup-${version}.${ext}",
-            "target": [
-                "dmg",
-                "zip"
-            ],
-            "category": "public.app-category.healthcare-fitness",
-            "icon": "assets/icon.icns",
-            "files": [
-                "main.js",
-                "preload.js",
-                "LICENSE",
-                "README.md",
-                "CHANGELOG.md",
-                "assets/**/*",
-                "src/**/*",
-                "package.json",
-                "node_modules/**/*"
-            ]
-        },
-        "linux": {
-            "artifactName": "${productName}-${version}.${ext}",
-            "category": "Utility",
-            "maintainer": "NekoSuneVR",
-            "icon": "assets/icon.png",
-            "synopsis": "Pulsoid with Discord RPC and overlay dashboard",
-            "description": "PulsoidApp brings Pulsoid with Discord Rich Presence and an in-app dashboard with an OBS-friendly overlay.",
-            "files": [
-                "main.js",
-                "preload.js",
-                "LICENSE",
-                "README.md",
-                "CHANGELOG.md",
-                "assets/**/*",
-                "src/**/*",
-                "package.json",
-                "node_modules/**/*"
-            ],
-            "target": [
-                {
-                  "target": "deb",
-                  "arch": ["armv7l", "arm64", "x64"]
-                },
-                {
-                  "target": "AppImage",
-                  "arch": ["armv7l", "arm64", "x64"]
-                },
-                "snap"
-            ]
-        },
-        "snap": {
-            "confinement": "strict",
-            "grade": "stable",
-            "summary": "PulsoidApp integrates Pulsoid with Discord RPC, a dashboard app for OBS.",
-            "description": "PulsoidApp is used with Pulsoid, offering OBS overlays, Discord RPC integration, and easy usage within a single application.",
-            "plugs": [
-                "network",
-                "x11",
-                "wayland",
-                "unity7",
-                "pulseaudio",
-                "home",
-                "process-control",
-                "system-observe",
-                "desktop",
-                "desktop-legacy"
-            ],
-            "environment": {
-                "DISCORD_RPC_ENABLE": "1",
-                "ELECTRON_DISABLE_SECURITY_WARNINGS": "1"
-            }
-        },
-        "deb": {
-            "priority": "optional",
-            "depends": [
-                "libgtk-3-0",
-                "libnss3",
-                "libxss1",
-                "libasound2",
-                "libatk-bridge2.0-0",
-                "libdrm2",
-                "libgbm1"
-            ]
-        }
+    "files": [
+      "**/*",
+      "!node_modules/.cache"
+    ],
+    "win": {
+      "artifactName": "${productName}-Setup-${version}.${ext}",
+      "target": [
+        "nsis",
+        "msi"
+      ],
+      "icon": "assets/icon.ico",
+      "files": [
+        "main.js",
+        "preload.js",
+        "LICENSE",
+        "README.md",
+        "CHANGELOG.md",
+        "assets/**/*",
+        "src/**/*",
+        "package.json",
+        "node_modules/**/*"
+      ]
     },
-
-    "nsis": {
-        "allowToChangeInstallationDirectory": true,
-        "license": "LICENSE",
-        "oneClick": false
+    "mac": {
+      "artifactName": "${productName}-Setup-${version}.${ext}",
+      "target": [
+        "dmg",
+        "zip"
+      ],
+      "category": "public.app-category.healthcare-fitness",
+      "icon": "assets/icon.icns",
+      "files": [
+        "main.js",
+        "preload.js",
+        "LICENSE",
+        "README.md",
+        "CHANGELOG.md",
+        "assets/**/*",
+        "src/**/*",
+        "package.json",
+        "node_modules/**/*"
+      ]
     },
-    "dependencies": {
-        "discord-rpc": "^4.0.1",
-        "electron-store": "^7.0.3",
-        "ws": "^8.18.0"
+    "linux": {
+      "artifactName": "PulsoidApp-${version}-${arch}.${ext}",
+      "category": "Utility",
+      "maintainer": "NekoSuneVR",
+      "icon": "assets/icon.png",
+      "synopsis": "Pulsoid with Discord RPC and overlay dashboard",
+      "description": "PulsoidApp brings Pulsoid with Discord Rich Presence and an in-app dashboard with an OBS-friendly overlay.",
+      "files": [
+        "main.js",
+        "preload.js",
+        "LICENSE",
+        "README.md",
+        "CHANGELOG.md",
+        "assets/**/*",
+        "src/**/*",
+        "package.json",
+        "node_modules/**/*"
+      ],
+      "target": [
+        "deb",
+        "AppImage"
+      ]
     },
-    "devDependencies": {
-        "electron": "^30.0.0",
-        "electron-builder": "^25.1.8"
+    "deb": {
+      "priority": "optional",
+      "depends": [
+        "libgtk-3-0",
+        "libnss3",
+        "libxss1",
+        "libasound2",
+        "libatk-bridge2.0-0",
+        "libdrm2",
+        "libgbm1"
+      ],
+      "afterInstall": "build/deb-after-install.sh",
+      "afterRemove": "build/deb-after-remove.sh"
+    },
+    "snap": {
+      "confinement": "strict",
+      "grade": "stable",
+      "summary": "PulsoidApp integrates Pulsoid with Discord RPC, a dashboard app for OBS.",
+      "description": "PulsoidApp is used with Pulsoid, offering OBS overlays, Discord RPC integration, and easy usage within a single application.",
+      "plugs": [
+        "network",
+        "x11",
+        "wayland",
+        "unity7",
+        "pulseaudio",
+        "home",
+        "process-control",
+        "system-observe",
+        "desktop",
+        "desktop-legacy"
+      ],
+      "environment": {
+        "DISCORD_RPC_ENABLE": "1",
+        "ELECTRON_DISABLE_SECURITY_WARNINGS": "1"
+      }
     }
+  },
+  "nsis": {
+    "allowToChangeInstallationDirectory": true,
+    "license": "LICENSE",
+    "oneClick": false
+  },
+  "dependencies": {
+    "discord-rpc": "^4.0.1",
+    "electron-store": "^7.0.3",
+    "ws": "^8.18.0"
+  },
+  "devDependencies": {
+    "electron": "^30.0.0",
+    "electron-builder": "^25.1.8"
+  }
 }
