@@ -9,6 +9,7 @@
         "start": "electron .",
         "build": "electron-builder",
         "build:win": "electron-builder --win",
+        "build:mac": "electron-builder --mac",
         "test": "echo \"Error: no test specified\" && exit 1"
     },
     "build": {
@@ -37,6 +38,26 @@
                 "msi"
             ],
             "icon": "assets/icon.ico",
+            "files": [
+                "main.js",
+                "preload.js",
+                "LICENSE",
+                "README.md",
+                "CHANGELOG.md",
+                "assets/**/*",
+                "src/**/*",
+                "package.json",
+                "node_modules/**/*"
+            ]
+        },
+        "mac": {
+            "artifactName": "${productName}-Setup-${version}.${ext}",
+            "target": [
+                "dmg",
+                "zip"
+            ],
+            "category": "public.app-category.healthcare-fitness",
+            "icon": "assets/icon.icns",
             "files": [
                 "main.js",
                 "preload.js",
