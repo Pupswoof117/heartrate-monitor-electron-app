@@ -72,47 +72,77 @@
                 "node_modules/**/*"
             ]
         },
-            "linux": {
-                "artifactName": "${productName}-${version}.${ext}",
-                "category": "Utility",
-                "icon": "assets/icon.png",
-                "files": [
-                    "main.js",
-                    "preload.js",
-                    "LICENSE",
-                    "README.md",
-                    "CHANGELOG.md",
-                    "assets/**/*",
-                    "src/**/*",
-                    "package.json",
-                    "node_modules/**/*"
-                ],
-                "target": [
-                    "AppImage",
-                    "deb",
-                    "rpm"
-                ]
-            },
-            "snap": {
-                "confinement": "strict",
-                "grade": "stable",
-                "summary": "PulsoidApp integrates Pulsoid with Discord RPC, a dashboard app for OBS.",
-                "description": "PulsoidApp is used with Pulsoid, offering OBS overlays, Discord RPC integration, and easy usage within a single application.",
-                "plugs": [
-                    "network",
-                    "x11",
-                    "unity7",
-                    "pulseaudio",
-                    "home"
-                ]
-            },
-            "flatpak": {
-                "runtime": "org.freedesktop.Platform",
-                "runtimeVersion": "21.08",
-                "sdk": "org.freedesktop.Sdk",
-                "modules": []
+        "linux": {
+            "artifactName": "${productName}-${version}.${ext}",
+            "category": "Utility",
+            "icon": "assets/icon.png",
+            "files": [
+                "main.js",
+                "preload.js",
+                "LICENSE",
+                "README.md",
+                "CHANGELOG.md",
+                "assets/**/*",
+                "src/**/*",
+                "package.json",
+                "node_modules/**/*"
+            ],
+            "target": [
+                "AppImage",
+                "deb",
+                "rpm"
+            ]
+        },
+        "snap": {
+            "confinement": "strict",
+            "grade": "stable",
+            "summary": "PulsoidApp integrates Pulsoid with Discord RPC, a dashboard app for OBS.",
+            "description": "PulsoidApp is used with Pulsoid, offering OBS overlays, Discord RPC integration, and easy usage within a single application.",
+            "plugs": [
+                "network",
+                "x11",
+                "unity7",
+                "pulseaudio",
+                "home",
+                "process-control",
+                "system-observe"
+            ],
+            "environment": {
+                "DISCORD_RPC_ENABLE": "1",
+                "ELECTRON_DISABLE_SECURITY_WARNINGS": "1"
             }
         },
+        "flatpak": {
+            "runtime": "org.freedesktop.Platform",
+            "runtimeVersion": "22.08",
+            "sdk": "org.freedesktop.Sdk",
+            "modules": [
+                {
+                    "name": "app",
+                    "buildsystem": "simple",
+                    "build-commands": [
+                        "npm install --production",
+                        "npm run build"
+                    ],
+                    "sources": [
+                        {
+                            "type": "dir",
+                            "path": "."
+                        }
+                    ]
+                }
+            ],
+            "finish-args": [
+                "--share=ipc",
+                "--filesystem=host",
+                "--talk-name=org.freedesktop.Flatpak",
+                "--talk-name=com.discord.Discord",
+                "--socket=fallback-x11",
+                "--socket=pulseaudio",
+                "--device=dri"
+            ]
+        }
+    },
 
         "nsis": {
             "allowToChangeInstallationDirectory": true,
