@@ -10,7 +10,7 @@
         "build": "electron-builder",
         "build:win": "electron-builder --win",
         "build:mac": "electron-builder --mac",
-        "build:linux": "electron-builder --linux",
+        "build:linux": "electron-builder --linux --x64",
         "build:flatpak": "electron-builder --linux flatpak",
         "build:snap": "electron-builder --linux snap"
     },
@@ -72,28 +72,29 @@
                 "node_modules/**/*"
             ]
         },
-        "linux": {
-            "artifactName": "${productName}-${version}.${ext}",
-            "target": [
-                "AppImage",
-                "deb",
-                "rpm",
-                "flatpak",
-                "snap"
-            ],
-            "category": "Utility",
-            "icon": "assets/icon.png",
-            "files": [
-                "main.js",
-                "preload.js",
-                "LICENSE",
-                "README.md",
-                "CHANGELOG.md",
-                "assets/**/*",
-                "src/**/*",
-                "package.json",
-                "node_modules/**/*"
-            ],
+            "linux": {
+                "artifactName": "${productName}-${version}.${ext}",
+                "category": "Utility",
+                "icon": "assets/icon.png",
+                "files": [
+                    "main.js",
+                    "preload.js",
+                    "LICENSE",
+                    "README.md",
+                    "CHANGELOG.md",
+                    "assets/**/*",
+                    "src/**/*",
+                    "package.json",
+                    "node_modules/**/*"
+                ],
+                "target": [
+                    "AppImage",
+                    "deb",
+                    "rpm",
+                    "flatpak",
+                    "snap"
+                ]
+            },
             "snap": {
                 "confinement": "strict",
                 "grade": "stable",
@@ -114,12 +115,12 @@
                 "modules": []
             }
         },
-    "nsis": {
+
+        "nsis": {
             "allowToChangeInstallationDirectory": true,
             "license": "LICENSE",
             "oneClick": false
-        }
-    },
+        },
     "dependencies": {
         "discord-rpc": "^4.0.1",
         "electron-store": "^7.0.3",
