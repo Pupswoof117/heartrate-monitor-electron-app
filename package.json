@@ -90,9 +90,7 @@
                 "target": [
                     "AppImage",
                     "deb",
-                    "rpm",
-                    "flatpak",
-                    "snap"
+                    "rpm"
                 ]
             },
             "snap": {
