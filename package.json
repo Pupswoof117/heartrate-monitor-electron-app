@@ -134,7 +134,7 @@
                     ]
                 }
             ],
-            "finish-args": [
+            "finishArgs": [
                 "--share=ipc",
                 "--filesystem=host",
                 "--talk-name=org.freedesktop.Flatpak",
