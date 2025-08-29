@@ -62,7 +62,7 @@ jobs:
       - name: Upload release notes artifact  (expire in 1 day)
         uses: actions/upload-artifact@v4
         with:
-          name: release_notes
+          name: release_notes-${{BUILD_TAG}}
           path: release_notes.txt
           retention-days: 1
           
@@ -420,7 +420,7 @@ jobs:
       - name: Download release notes artifact
         uses: actions/download-artifact@v4
         with:
-          name: release_notes
+          name: release_notes-${{ needs.prepare.outputs.build_tag }}
           path: .
 
       - name: Show release notes
