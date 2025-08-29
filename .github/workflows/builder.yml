@@ -443,45 +443,32 @@ jobs:
         run: |
           ./mc cp release_notes.txt "${{ env.MINIO_BUCKET_PATH }}/${{ env.VERSION }}${{ env.BUILD_TAG }}/release_notes.txt"
 
-      - name: Compose ONE Discord payload and send
+      - name: Send Release Info to Discord
         env:
           DISCORD_WEBHOOK: ${{ secrets.DISCORD_WEBHOOK }}
         run: |
-          set -e
           RELEASE_NOTES=$(cat release_notes.txt)
+          BASE_URL="https://uploadminioger1.nekosunevr.co.uk/nekosunetools/pulsoidapp/release/${{ needs.prepare.outputs.version }}-v${{ needs.prepare.outputs.build_tag }}"
+    
+          LINKS="• [Windows (EXE)]($BASE_URL/PulsoidApp-Setup-${{ needs.prepare.outputs.version }}.exe)\n• [Windows (MSI)]($BASE_URL/PulsoidApp-Setup-${{ needs.prepare.outputs.version }}.msi)\n• [Linux x64 AppImage]($BASE_URL/PulsoidApp-Setup-${{ needs.prepare.outputs.version }}-x86_64.AppImage)\n• [Linux x64 .deb]($BASE_URL/PulsoidApp-Setup-${{ needs.prepare.outputs.version }}-amd64.deb)\n• [Raspberry Pi ARMv7 AppImage]($BASE_URL/PulsoidApp-Setup-${{ needs.prepare.outputs.version }}-armv7l.AppImage)\n• [Raspberry Pi ARM64 AppImage]($BASE_URL/PulsoidApp-Setup-${{ needs.prepare.outputs.version }}-arm64.AppImage)\n• [macOS DMG]($BASE_URL/PulsoidApp-Setup-${{ needs.prepare.outputs.version }}.dmg)\n• [macOS ZIP]($BASE_URL/PulsoidApp-Setup-${{ needs.prepare.outputs.version }}.zip)\n"
 
-          downloads=""
-          # Windows
-          [ -n "${WIN_EXE_URL}" ] && downloads="${downloads}`n• [Windows (EXE)](${WIN_EXE_URL})"
-          [ -n "${WIN_MSI_URL}" ] && downloads="${downloads}`n• [Windows (MSI)](${WIN_MSI_URL})"
-          # Linux x64
-          [ -n "${LINUX_APPIMAGE_URL}" ] && downloads="${downloads}`n• [Linux x64 AppImage](${LINUX_APPIMAGE_URL})"
-          [ -n "${LINUX_DEB_URL}" ] && downloads="${downloads}`n• [Linux x64 .deb](${LINUX_DEB_URL})"
-          # Raspberry Pi
-          [ -n "${ARM7_APPIMG_URL}" ] && downloads="${downloads}`n• [Raspberry Pi ARMv7 AppImage](${ARM7_APPIMG_URL})"
-          [ -n "${ARM64_APPIMG_URL}" ] && downloads="${downloads}`n• [Raspberry Pi ARM64 AppImage](${ARM64_APPIMG_URL})"
-          # macOS
-          [ -n "${MAC_DMG_URL}" ] && downloads="${downloads}`n• [macOS DMG](${MAC_DMG_URL})"
-          [ -n "${MAC_ZIP_URL}" ] && downloads="${downloads}`n• [macOS ZIP](${MAC_ZIP_URL})"
-
-          [ -z "$downloads" ] && downloads="`n(No build artifacts were detected.)"
-
-          payload=$(jq -n \
+          JSON_PAYLOAD=$(jq -n \
             --arg content "<@&1384262560395559122> **UPDATE (ALL PLATFORMS)**" \
-            --arg title "New Release: v${VERSION}${BUILD_TAG}" \
-            --arg desc "${RELEASE_NOTES}`n`n**Downloads**:${downloads}" \
-            --arg avatar "https://cdn.discordapp.com/icons/1274732053337870417/8f0b3c1852bbd3cc11a237c2d326dcb1.webp?size=1024" \
-            '{
-              username: "Pulsoid APP Bot",
-              avatar_url: $avatar,
-              content: $content,
-              embeds: [{
-                title: $title,
-                description: $desc,
-                color: 16776960,
-                footer: { text: "Released by GitHub Actions" },
-                timestamp: (now | todate)
-              }]
-            }')
-
-          curl -sS -X POST -H "Content-Type: application/json" -d "$payload" "$DISCORD_WEBHOOK"
+            --arg title "New Release: v${{ env.VERSION }}" \
+            --arg description "$RELEASE_NOTES\n\n**Available Artifacts:**\n$LINKS" \
+            --argjson color 65280 \
+            --arg footer "Released by GitHub Actions" \
+            --arg timestamp "$(date --iso-8601=seconds)" \
+          '{
+            username: "Pulsoid APP Bot",
+            avatar_url: "https://cdn.discordapp.com/icons/1310653602951594024/cb8a2781368442a92b33dd2cb93b3afd.webp?size=512",
+            content: $content,
+            embeds: [{
+              title: $title,
+              description: $description,
+              color: $color,
+              footer: { text: $footer },
+              timestamp: $timestamp
+            }]
+          }')
+          curl -H "Content-Type: application/json" -d "$JSON_PAYLOAD" "$DISCORD_WEBHOOK"
