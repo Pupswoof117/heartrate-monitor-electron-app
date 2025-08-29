@@ -10,7 +10,9 @@
         "build": "electron-builder",
         "build:win": "electron-builder --win",
         "build:mac": "electron-builder --mac",
-        "test": "echo \"Error: no test specified\" && exit 1"
+        "build:linux": "electron-builder --linux",
+        "build:flatpak": "electron-builder --linux flatpak",
+        "build:snap": "electron-builder --linux snap"
     },
     "build": {
         "copyright": "Copyright © 2024-2025 NekoSuneVR",
@@ -70,7 +72,49 @@
                 "node_modules/**/*"
             ]
         },
-        "nsis": {
+        "linux": {
+            "artifactName": "${productName}-${version}.${ext}",
+            "target": [
+                "AppImage",
+                "deb",
+                "rpm",
+                "flatpak",
+                "snap"
+            ],
+            "category": "Utility",
+            "icon": "assets/icon.png",
+            "files": [
+                "main.js",
+                "preload.js",
+                "LICENSE",
+                "README.md",
+                "CHANGELOG.md",
+                "assets/**/*",
+                "src/**/*",
+                "package.json",
+                "node_modules/**/*"
+            ],
+            "snap": {
+                "confinement": "strict",
+                "grade": "stable",
+                "summary": "PulsoidApp integrates Pulsoid with Discord RPC, a dashboard app for OBS.",
+                "description": "PulsoidApp is used with Pulsoid, offering OBS overlays, Discord RPC integration, and easy usage within a single application.",
+                "plugs": [
+                    "network",
+                    "x11",
+                    "unity7",
+                    "pulseaudio",
+                    "home"
+                ]
+            },
+            "flatpak": {
+                "runtime": "org.freedesktop.Platform",
+                "runtimeVersion": "21.08",
+                "sdk": "org.freedesktop.Sdk",
+                "modules": []
+            }
+        },
+    "nsis": {
             "allowToChangeInstallationDirectory": true,
             "license": "LICENSE",
             "oneClick": false
