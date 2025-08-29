@@ -1,0 +1,67 @@
+{
+    "name": "pulsoid-electron",
+    "version": "1.0.0",
+    "author": "NekoSuneVR",
+    "license": "MIT",
+    "description": "PulsoidApp is Program use Pulsoid With Discord RPC and Dashboard on App with Overlay can use on OBS",
+    "main": "main.js",
+    "scripts": {
+        "start": "electron .",
+        "build": "electron-builder",
+        "build:win": "electron-builder --win",
+        "test": "echo \"Error: no test specified\" && exit 1"
+    },
+    "build": {
+        "copyright": "Copyright © 2024-2025 NekoSuneVR",
+        "appId": "com.nekosunevr.pulsoidapp",
+        "productName": "PulsoidApp",
+        "appx": {
+            "backgroundColor": "#ffffff",
+            "displayName": "PulsoidApp",
+            "publisher": "CN=NekoSuneVR",
+            "publisherDisplayName": "NekoSuneVR",
+            "identityName": "com.nekosunevr.pulsoidapp"
+        },
+        "directories": {
+            "output": "dist",
+            "buildResources": "assets"
+        },
+        "files": [
+            "**/*",
+            "!node_modules/.cache"
+        ],
+        "win": {
+            "artifactName": "${productName}-Setup-${version}.${ext}",
+            "target": [
+                "nsis",
+                "msi"
+            ],
+            "icon": "assets/icon.ico",
+            "files": [
+                "main.js",
+                "preload.js",
+                "LICENSE",
+                "README.md",
+                "CHANGELOG.md",
+                "assets/**/*",
+                "src/**/*",
+                "package.json",
+                "node_modules/**/*"
+            ]
+        },
+        "nsis": {
+            "allowToChangeInstallationDirectory": true,
+            "license": "LICENSE",
+            "oneClick": false
+        }
+    },
+    "dependencies": {
+        "discord-rpc": "^4.0.1",
+        "electron-store": "^7.0.3",
+        "ws": "^8.18.0"
+    },
+    "devDependencies": {
+        "electron": "^30.0.0",
+        "electron-builder": "^25.1.8"
+    }
+}

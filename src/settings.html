@@ -1,0 +1,97 @@
+<!doctype html>
+<html>
+
+<head>
+    <meta charset="utf-8" />
+    <meta http-equiv="Content-Security-Policy" content="default-src 'self' 'unsafe-inline' data:;" />
+    <title>Settings</title>
+    <link rel="stylesheet" href="./styles.css" />
+</head>
+
+<body>
+    <div class="container">
+        <div class="header">
+            <div class="title">⚙️ Settings</div>
+            <div class="row">
+                <button class="btn" id="btn-back">Back</button>
+            </div>
+        </div>
+
+        <div class="card" style="margin-top:16px;">
+            <h3>Pulsoid Access Token</h3>
+            <input id="token" type="password" placeholder="pulsoid_xxx"
+                style="width:100%;padding:10px;border-radius:10px;border:1px solid #2d3036;background:#0f1115;color:white;" />
+            <p class="muted">Stored locally using electron-store. Keep this secret.</p>
+        </div>
+
+        <div class="grid">
+            <div class="card">
+                <h3>Realtime</h3>
+                <label class="switch"><input id="realtime" type="checkbox"><span class="slider"></span></label>
+                <div style="font-size:12px;color:#9aa4ad;margin-top:8px;">Start/stop live WebSocket streaming.
+                </div>
+            </div>
+            <div class="card">
+                <h3>Discord RPC</h3>
+                <label class="switch"><input id="rpc" type="checkbox"><span class="slider"></span></label>
+                <div style="font-size:12px;color:#9aa4ad;margin-top:8px;">Toggle Rich Presence updates.</div>
+            </div>
+            <div class="card">
+                <h3>Update interval</h3>
+                <input id="interval" type="number" min="1000" step="500" value="5000"
+                    style="width:100%;padding:10px;border-radius:10px;border:1px solid #2d3036;background:#0f1115;color:white;" />
+                <div style="font-size:12px;color:#9aa4ad;margin-top:8px;">Milliseconds between Discord presence updates
+                    (rate-limit safe).</div>
+            </div>
+        </div>
+
+        <div class="row" style="margin-top:16px;">
+            <button class="btn primary" id="btn-save">Save</button>
+        </div>
+    </div>
+
+    <script type="module">
+        const settings = await window.api.getSettings();
+
+        const tokenInput = document.getElementById('token');
+        const rpcInput = document.getElementById('rpc');
+        const realtimeInput = document.getElementById('realtime');
+        const intervalInput = document.getElementById('interval');
+        const btnBack = document.getElementById('btn-back');
+        const btnSave = document.getElementById('btn-save');
+        const btnOauth = document.getElementById('btn-oauth');
+
+        // fill initial values
+        tokenInput.value = settings.pulsoidToken || '';
+        rpcInput.checked = !!settings.discordRpcEnabled;
+        realtimeInput.checked = !!settings.realtimeEnabled;
+        intervalInput.value = settings.updateIntervalMs || 5000;
+
+        btnBack.onclick = () => history.back();
+        btnSave.onclick = async () => {
+            await window.api.saveSettings({
+                pulsoidToken: tokenInput.value,
+                discordRpcEnabled: rpcInput.checked,
+                realtimeEnabled: realtimeInput.checked,
+                updateIntervalMs: Number(intervalInput.value)
+            });
+            history.back();
+        };
+
+        btnOauth.onclick = async () => {
+            const t = await window.api.acquirePulsoidToken({
+                clientId: '4463b85f-79cd-445f-abee-70a0887f0a85',
+                scope: 'data:heart_rate:read'
+            });
+            if (t && t.access_token) {
+                tokenInput.value = t.access_token;
+                await window.api.saveSettings({ pulsoidToken: t.access_token });
+                alert('Token saved. Realtime can now connect.');
+            } else if (t && t.copied) {
+                alert('A browser window has opened on Pulsoid. Copy the token shown there and paste it here.');
+            }
+        };
+    </script>
+</body>
+
+</html>

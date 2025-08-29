@@ -1,0 +1,30 @@
+<!doctype html>
+<html>
+
+<head>
+    <meta charset="utf-8" />
+    <meta http-equiv="Content-Security-Policy" content="default-src 'self' 'unsafe-inline' data:;" />
+    <title>Overlay</title>
+    <link rel="stylesheet" href="./styles.css" />
+</head>
+
+<body>
+    <div class="overlay-wrap">
+        <div class="overlay-text" id="overlayText"><span class="heart">❤</span> -- bpm</div>
+    </div>
+    <script>
+        function zoneClass(hr) {
+            if (hr < 90) return 'hr-green';
+            if (hr < 130) return 'hr-yellow';
+            return 'hr-red';
+        }
+        window.api.onHeartRate(({ hr }) => {
+            if (!hr) return;
+            overlayText.classList.remove('hr-green', 'hr-yellow', 'hr-red');
+            overlayText.classList.add(zoneClass(hr));
+            overlayText.innerText = `❤ ${hr} bpm`;
+        });
+    </script>
+</body>
+
+</html>
