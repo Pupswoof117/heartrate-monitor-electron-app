@@ -444,31 +444,74 @@ jobs:
           ./mc cp release_notes.txt "${{ env.MINIO_BUCKET_PATH }}/${{ env.VERSION }}${{ env.BUILD_TAG }}/release_notes.txt"
 
       - name: Send Release Info to Discord
+        shell: bash
         env:
           DISCORD_WEBHOOK: ${{ secrets.DISCORD_WEBHOOK }}
+          WIN_EXE_URL: ${{ env.WIN_EXE_URL }}
+          WIN_MSI_URL: ${{ env.WIN_MSI_URL }}
+          LINUX_APPIMAGE_URL: ${{ env.LINUX_APPIMAGE_URL }}
+          LINUX_DEB_URL: ${{ env.LINUX_DEB_URL }}
+          ARM7_APPIMG_URL: ${{ env.ARM7_APPIMG_URL }}
+          ARM64_APPIMG_URL: ${{ env.ARM64_APPIMG_URL }}
+          MAC_DMG_URL: ${{ env.MAC_DMG_URL }}
+          MAC_ZIP_URL: ${{ env.MAC_ZIP_URL }}
         run: |
-          RELEASE_NOTES=$(cat release_notes.txt)
-          BASE_URL="https://uploadminioger1.nekosunevr.co.uk/nekosunetools/pulsoidapp/release/${{ needs.prepare.outputs.version }}-v${{ needs.prepare.outputs.build_tag }}"
-    
-          LINKS="• [Windows (EXE)](${{ env.WIN_EXE_URL}})\n• [Windows (MSI)](${{ env.WIN_MSI_URL}})\n• [Linux x64 AppImage](${{ env.LINUX_APPIMAGE_URL}})\n• [Linux x64 .deb](${{ env.LINUX_DEB_URL}})\n• [Raspberry Pi ARMv7 AppImage](${{ env.ARM7_APPIMG_URL}})\n• [Raspberry Pi ARM64 AppImage](${{ env.ARM64_APPIMG_URL}})\n• [macOS DMG](${{ env.MAC_DMG_URL}})\n• [macOS ZIP](${{ env.MAC_ZIP_URL}})\n"
+          set -euo pipefail
 
-          JSON_PAYLOAD=$(jq -n \
+          jq -n \
+            --rawfile notes release_notes.txt \
             --arg content "<@&1384262560395559122> **UPDATE (ALL PLATFORMS)**" \
             --arg title "New Release: v${{ needs.prepare.outputs.version }}" \
-            --arg description "$RELEASE_NOTES\n\n**Available Artifacts:**\n$LINKS" \
+            --arg WIN_EXE_URL "$WIN_EXE_URL" \
+            --arg WIN_MSI_URL "$WIN_MSI_URL" \
+            --arg LINUX_APPIMAGE_URL "$LINUX_APPIMAGE_URL" \
+            --arg LINUX_DEB_URL "$LINUX_DEB_URL" \
+            --arg ARM7_APPIMG_URL "$ARM7_APPIMG_URL" \
+            --arg ARM64_APPIMG_URL "$ARM64_APPIMG_URL" \
+            --arg MAC_DMG_URL "$MAC_DMG_URL" \
+            --arg MAC_ZIP_URL "$MAC_ZIP_URL" \
             --argjson color 65280 \
             --arg footer "Released by GitHub Actions" \
-            --arg timestamp "$(date --iso-8601=seconds)" \
-          '{
+            --arg timestamp "$(date -u +%Y-%m-%dT%H:%M:%SZ)" \
+          '
+          def trunc(s; n): if (s|length) > n then (s[0:(n-1)] + "…") else s end;
+
+          # Build the artifacts list with real newlines via join("\n")
+          def artifacts_block:
+            "**Available Artifacts:**\n" +
+            ([
+              "• [Windows (EXE)](" + $WIN_EXE_URL + ")",
+              "• [Windows (MSI)](" + $WIN_MSI_URL + ")",
+              "• [Linux x64 AppImage](" + $LINUX_APPIMAGE_URL + ")",
+              "• [Linux x64 .deb](" + $LINUX_DEB_URL + ")",
+              "• [Raspberry Pi ARMv7 AppImage](" + $ARM7_APPIMG_URL + ")",
+              "• [Raspberry Pi ARM64 AppImage](" + $ARM64_APPIMG_URL + ")",
+              "• [macOS DMG](" + $MAC_DMG_URL + ")",
+              "• [macOS ZIP](" + $MAC_ZIP_URL + ")"
+            ] | join("\n"));
+
+          {
             username: "Pulsoid APP Bot",
             avatar_url: "https://cdn.discordapp.com/icons/1310653602951594024/cb8a2781368442a92b33dd2cb93b3afd.webp?size=512",
             content: $content,
-            embeds: [{
-              title: $title,
-              description: $description,
-              color: $color,
-              footer: { text: $footer },
-              timestamp: $timestamp
-            }]
-          }')
-          curl -H "Content-Type: application/json" -d "$JSON_PAYLOAD" "$DISCORD_WEBHOOK"
+            allowed_mentions: { parse: ["roles"] },
+            embeds: [
+              {
+                title: $title,
+                description: trunc(($notes + "\n\n" + artifacts_block); 4096),
+                color: $color,
+                footer: { text: $footer },
+                timestamp: $timestamp
+              }
+            ]
+          }' > payload.json
+
+          http_code=$(curl -sS -o response.txt -w "%{http_code}" \
+            -H "Content-Type: application/json" \
+            -d @payload.json \
+            "$DISCORD_WEBHOOK")
+
+          echo "Discord HTTP $http_code"
+          if [[ "$http_code" != "204" && "$http_code" != "200" ]]; then
+            echo "Error from Discord:"; cat response.txt; exit 1
+          fi
