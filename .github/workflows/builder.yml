@@ -450,11 +450,11 @@ jobs:
           RELEASE_NOTES=$(cat release_notes.txt)
           BASE_URL="https://uploadminioger1.nekosunevr.co.uk/nekosunetools/pulsoidapp/release/${{ needs.prepare.outputs.version }}-v${{ needs.prepare.outputs.build_tag }}"
     
-          LINKS="• [Windows (EXE)]($BASE_URL/PulsoidApp-Setup-${{ needs.prepare.outputs.version }}.exe)\n• [Windows (MSI)]($BASE_URL/PulsoidApp-Setup-${{ needs.prepare.outputs.version }}.msi)\n• [Linux x64 AppImage]($BASE_URL/PulsoidApp-Setup-${{ needs.prepare.outputs.version }}-x86_64.AppImage)\n• [Linux x64 .deb]($BASE_URL/PulsoidApp-Setup-${{ needs.prepare.outputs.version }}-amd64.deb)\n• [Raspberry Pi ARMv7 AppImage]($BASE_URL/PulsoidApp-Setup-${{ needs.prepare.outputs.version }}-armv7l.AppImage)\n• [Raspberry Pi ARM64 AppImage]($BASE_URL/PulsoidApp-Setup-${{ needs.prepare.outputs.version }}-arm64.AppImage)\n• [macOS DMG]($BASE_URL/PulsoidApp-Setup-${{ needs.prepare.outputs.version }}.dmg)\n• [macOS ZIP]($BASE_URL/PulsoidApp-Setup-${{ needs.prepare.outputs.version }}.zip)\n"
+          LINKS="• [Windows (EXE)]($WIN_EXE_URL)\n• [Windows (MSI)]($WIN_MSI_URL)\n• [Linux x64 AppImage]($LINUX_APPIMAGE_URL)\n• [Linux x64 .deb]($LINUX_DEB_URL)\n• [Raspberry Pi ARMv7 AppImage]($ARM7_APPIMG_URL)\n• [Raspberry Pi ARM64 AppImage]($ARM64_APPIMG_URL)\n• [macOS DMG]($MAC_DMG_URL)\n• [macOS ZIP]($MAC_ZIP_URL)\n"
 
           JSON_PAYLOAD=$(jq -n \
             --arg content "<@&1384262560395559122> **UPDATE (ALL PLATFORMS)**" \
-            --arg title "New Release: v${{ env.VERSION }}" \
+            --arg title "New Release: v${{ VERSION }}" \
             --arg description "$RELEASE_NOTES\n\n**Available Artifacts:**\n$LINKS" \
             --argjson color 65280 \
             --arg footer "Released by GitHub Actions" \
