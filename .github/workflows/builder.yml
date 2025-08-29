@@ -258,9 +258,7 @@ jobs:
         run: |
           BASE="${{ env.PUBLIC_BASE_URL }}/${{ env.VERSION }}${{ env.BUILD_TAG }}"
           APPIMG_ARMV7L=$(ls dist/*armv7l*.AppImage 2>/dev/null | xargs -n1 -I{} basename "{}" | head -n1 || echo "")
-          DEB_ARMV7L=$(ls dist/*armv7l*.deb dist/*_armhf.deb 2>/dev/null | xargs -n1 -I{} basename "{}" | head -n1 || echo "")
           [ -n "$APPIMG_ARMV7L" ] && echo "ARM7_APPIMG_URL=$BASE/$APPIMG_ARMV7L" >> $GITHUB_OUTPUT
-          [ -n "$DEB_ARMV7L" ] && echo "ARM7_DEB_URL=$BASE/$DEB_ARMV7L" >> $GITHUB_OUTPUT
 
   raspi-arm64:
     name: Build & Upload — Raspberry Pi (arm64)
@@ -414,9 +412,7 @@ jobs:
       LINUX_DEB_URL: ${{ needs.linux-x64.outputs.LINUX_DEB_URL }}
       # Raspberry Pi ⬅️ use raspi-* job IDs
       ARM7_APPIMG_URL: ${{ needs.raspi-armv7l.outputs.ARM7_APPIMG_URL }}
-      ARM7_DEB_URL: ${{ needs.raspi-armv7l.outputs.ARM7_DEB_URL }}
       ARM64_APPIMG_URL: ${{ needs.raspi-arm64.outputs.ARM64_APPIMG_URL }}
-      ARM64_DEB_URL: ${{ needs.raspi-arm64.outputs.ARM64_DEB_URL }}
       # macOS
       MAC_DMG_URL: ${{ needs.build-macos.outputs.MAC_DMG_URL }}
       MAC_ZIP_URL: ${{ needs.build-macos.outputs.MAC_ZIP_URL }}
@@ -463,9 +459,7 @@ jobs:
           [ -n "${LINUX_DEB_URL}" ] && downloads="${downloads}\n• Linux x64 .deb: ${LINUX_DEB_URL}"
           # Raspberry Pi
           [ -n "${ARM7_APPIMG_URL}" ] && downloads="${downloads}\n• Raspberry Pi ARMv7 AppImage: ${ARM7_APPIMG_URL}"
-          [ -n "${ARM7_DEB_URL}" ] && downloads="${downloads}\n• Raspberry Pi ARMv7 .deb: ${ARM7_DEB_URL}"
           [ -n "${ARM64_APPIMG_URL}" ] && downloads="${downloads}\n• Raspberry Pi ARM64 AppImage: ${ARM64_APPIMG_URL}"
-          [ -n "${ARM64_DEB_URL}" ] && downloads="${downloads}\n• Raspberry Pi ARM64 .deb: ${ARM64_DEB_URL}"
           # macOS
           [ -n "${MAC_DMG_URL}" ] && downloads="${downloads}\n• macOS DMG: ${MAC_DMG_URL}"
           [ -n "${MAC_ZIP_URL}" ] && downloads="${downloads}\n• macOS ZIP: ${MAC_ZIP_URL}"
