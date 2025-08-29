@@ -403,7 +403,7 @@ jobs:
       - build-macos
     env:
       VERSION: ${{ needs.prepare.outputs.version }}
-      BUILD_TAG: ${{ needs.prepare.outputs.build_tag }}/
+      BUILD_TAG: ${{ needs.prepare.outputs.build_tag }}
       # Windows
       WIN_EXE_URL: https://uploadminioger1.nekosunevr.co.uk/nekosunetools/pulsoidapp/release/${{ needs.prepare.outputs.version }}${{ needs.prepare.outputs.build_tag }}/PulsoidApp-Setup-${{ needs.prepare.outputs.version }}.exe
       WIN_MSI_URL: https://uploadminioger1.nekosunevr.co.uk/nekosunetools/pulsoidapp/release/${{ needs.prepare.outputs.version }}${{ needs.prepare.outputs.build_tag }}/PulsoidApp-Setup-${{ needs.prepare.outputs.version }}.msi
