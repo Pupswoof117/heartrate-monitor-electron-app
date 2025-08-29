@@ -405,17 +405,17 @@ jobs:
       VERSION: ${{ needs.prepare.outputs.version }}
       BUILD_TAG: ${{ needs.prepare.outputs.build_tag }}/
       # Windows
-      WIN_EXE_URL: ${{ env.PUBLIC_BASE_URL }}/${{ needs.prepare.outputs.version }}${{ needs.prepare.outputs.build_tag }}/PulsoidApp-Setup-${{ needs.prepare.outputs.version }}.exe
-      WIN_MSI_URL: ${{ env.PUBLIC_BASE_URL }}/${{ needs.prepare.outputs.version }}${{ needs.prepare.outputs.build_tag }}/PulsoidApp-Setup-${{ needs.prepare.outputs.version }}.msi
+      WIN_EXE_URL: https://uploadminioger1.nekosunevr.co.uk/nekosunetools/pulsoidapp/release/${{ needs.prepare.outputs.version }}${{ needs.prepare.outputs.build_tag }}/PulsoidApp-Setup-${{ needs.prepare.outputs.version }}.exe
+      WIN_MSI_URL: https://uploadminioger1.nekosunevr.co.uk/nekosunetools/pulsoidapp/release/${{ needs.prepare.outputs.version }}${{ needs.prepare.outputs.build_tag }}/PulsoidApp-Setup-${{ needs.prepare.outputs.version }}.msi
       # Linux x64  ⬅️ use linux-x64 (not build-linux)
-      LINUX_APPIMAGE_URL: ${{ env.PUBLIC_BASE_URL }}/${{ needs.prepare.outputs.version }}${{ needs.prepare.outputs.build_tag }}/PulsoidApp-Setup-${{ needs.prepare.outputs.version }}-x86_64.AppImage
-      LINUX_DEB_URL: ${{ env.PUBLIC_BASE_URL }}/${{ needs.prepare.outputs.version }}${{ needs.prepare.outputs.build_tag }}/PulsoidApp-Setup-${{ needs.prepare.outputs.version }}-amd64.deb
+      LINUX_APPIMAGE_URL: https://uploadminioger1.nekosunevr.co.uk/nekosunetools/pulsoidapp/release/${{ needs.prepare.outputs.version }}${{ needs.prepare.outputs.build_tag }}/PulsoidApp-Setup-${{ needs.prepare.outputs.version }}-x86_64.AppImage
+      LINUX_DEB_URL: https://uploadminioger1.nekosunevr.co.uk/nekosunetools/pulsoidapp/release/${{ needs.prepare.outputs.version }}${{ needs.prepare.outputs.build_tag }}/PulsoidApp-Setup-${{ needs.prepare.outputs.version }}-amd64.deb
       # Raspberry Pi ⬅️ use raspi-* job IDs
-      ARM7_APPIMG_URL: ${{ env.PUBLIC_BASE_URL }}/${{ needs.prepare.outputs.version }}${{ needs.prepare.outputs.build_tag }}/PulsoidApp-Setup-${{ needs.prepare.outputs.version }}-armv7l.AppImage
-      ARM64_APPIMG_URL: ${{ env.PUBLIC_BASE_URL }}/${{ needs.prepare.outputs.version }}${{ needs.prepare.outputs.build_tag }}/PulsoidApp-Setup-${{ needs.prepare.outputs.version }}-arm64.AppImage
+      ARM7_APPIMG_URL: https://uploadminioger1.nekosunevr.co.uk/nekosunetools/pulsoidapp/release/${{ needs.prepare.outputs.version }}${{ needs.prepare.outputs.build_tag }}/PulsoidApp-Setup-${{ needs.prepare.outputs.version }}-armv7l.AppImage
+      ARM64_APPIMG_URL: https://uploadminioger1.nekosunevr.co.uk/nekosunetools/pulsoidapp/release/${{ needs.prepare.outputs.version }}${{ needs.prepare.outputs.build_tag }}/PulsoidApp-Setup-${{ needs.prepare.outputs.version }}-arm64.AppImage
       # macOS
-      MAC_DMG_URL: ${{ env.PUBLIC_BASE_URL }}/${{ needs.prepare.outputs.version }}${{ needs.prepare.outputs.build_tag }}/PulsoidApp-Setup-${{ needs.prepare.outputs.version }}.dmg
-      MAC_ZIP_URL: ${{ env.PUBLIC_BASE_URL }}/${{ needs.prepare.outputs.version }}${{ needs.prepare.outputs.build_tag }}/PulsoidApp-Setup-${{ needs.prepare.outputs.version }}.zip
+      MAC_DMG_URL: https://uploadminioger1.nekosunevr.co.uk/nekosunetools/pulsoidapp/release/${{ needs.prepare.outputs.version }}${{ needs.prepare.outputs.build_tag }}/PulsoidApp-Setup-${{ needs.prepare.outputs.version }}.dmg
+      MAC_ZIP_URL: https://uploadminioger1.nekosunevr.co.uk/nekosunetools/pulsoidapp/release/${{ needs.prepare.outputs.version }}${{ needs.prepare.outputs.build_tag }}/PulsoidApp-Setup-${{ needs.prepare.outputs.version }}.zip
     steps:
       - name: Download release notes artifact
         uses: actions/download-artifact@v4
