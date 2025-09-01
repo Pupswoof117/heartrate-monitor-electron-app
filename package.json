@@ -14,10 +14,10 @@
     "build": {
         "copyright": "Copyright © 2024-2025 NekoSuneVR",
         "appId": "com.nekosunevr.pulsoidapp",
-        "productName": "PulsoidApp",
+        "productName": "HRMApp",
         "appx": {
             "backgroundColor": "#ffffff",
-            "displayName": "PulsoidApp",
+            "displayName": "HRMApp",
             "publisher": "CN=NekoSuneVR",
             "publisherDisplayName": "NekoSuneVR",
             "identityName": "com.nekosunevr.pulsoidapp"
