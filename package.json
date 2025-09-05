@@ -7,7 +7,7 @@
     "email": "nekosunevr@hyperiontv.net"
   },
   "license": "MIT",
-  "description": "PulsoidApp is Program use Pulsoid With Discord RPC and Dashboard on App with Overlay can use on OBS",
+  "description": "NekoSune PulsoidApp is Program use Pulsoid With Discord RPC and Dashboard on App with Overlay can use on OBS",
   "main": "main.js",
   "scripts": {
     "start": "electron .",
