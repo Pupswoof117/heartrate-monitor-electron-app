@@ -1,43 +1,48 @@
 {
-  "name": "pulsoid-electron",
+  "name": "nekosune-hrmapp",
+  "homepage": "https://github.com/NekoSuneProjects/nekosune-hrmapp",
   "version": "1.0.0",
   "author": {
     "name": "NekoSuneVR",
     "email": "nekosunevr@hyperiontv.net"
   },
   "license": "MIT",
-  "description": "PulsoidApp is Program use Pulsoid With Discord RPC and Dashboard on App with Overlay can use on OBS",
+  "description": "HRMApp is Program use Pulsoid With Discord RPC and Dashboard on App with Overlay can use on OBS",
   "main": "main.js",
   "scripts": {
     "start": "electron .",
     "build": "electron-builder",
-    "build:win": "electron-builder --win --publish=never",
-    "build:mac": "electron-builder --mac --publish=never",
-    "build:linux:x64": "electron-builder -l AppImage deb --x64 --publish=never",
-    "build:pi:v7": "electron-builder -l AppImage --armv7l --publish=never",
-    "build:pi:aarch64": "electron-builder -l AppImage --arm64 --publish=never",
-    "build:snap": "electron-builder --linux snap --publish=never"
+    "build:win": "electron-builder --win",
+    "build:mac": "electron-builder --mac",
+    "build:linux:x64": "electron-builder --linux --x64",
+    "build:linux:arm64": "electron-builder --linux --arm64",
+    "build:linux:armv7l": "electron-builder --linux --armv7l",
+    "build:linux:all": "npm run build:linux:x64 && npm run build:linux:arm64 && npm run build:linux:armv7l",
+    "build:snap:x64": "electron-builder --linux snap --x64",
+    "build:snap:arm64": "electron-builder --linux snap --arm64",
+    "build:snap:armv7l": "electron-builder --linux snap --armv7l",
+    "build:snap:all": "npm run build:snap:x64 && npm run build:snap:arm64 && npm run build:snap:armv7l"
   },
   "build": {
     "copyright": "Copyright © 2024-2025 NekoSuneVR",
-    "appId": "com.nekosunevr.pulsoidapp",
-    "productName": "PulsoidApp",
+    "appId": "com.nekosunevr.nekosunehrmapp",
+    "productName": "HRMApp",
     "asar": true,
+    "files": [
+      "!node_modules/.cache",
+      "!dist/**"
+    ],
     "appx": {
       "backgroundColor": "#ffffff",
-      "displayName": "PulsoidApp",
+      "displayName": "HRMApp",
       "publisher": "CN=NekoSuneVR",
       "publisherDisplayName": "NekoSuneVR",
-      "identityName": "com.nekosunevr.pulsoidapp"
+      "identityName": "com.nekosunevr.nekosunehrmapp"
     },
     "directories": {
-      "output": "dist",
+      "output": "dist/${os}-${arch}",
       "buildResources": "assets"
     },
-    "files": [
-      "**/*",
-      "!node_modules/.cache"
-    ],
     "win": {
       "artifactName": "${productName}-Setup-${version}.${ext}",
       "target": [
@@ -78,12 +83,12 @@
       ]
     },
     "linux": {
-      "artifactName": "PulsoidApp-${version}-${arch}.${ext}",
+      "artifactName": "${productName}-${version}-${arch}.${ext}",
       "category": "Utility",
       "maintainer": "NekoSuneVR",
       "icon": "assets/icon.png",
-      "synopsis": "Pulsoid with Discord RPC and overlay dashboard",
-      "description": "PulsoidApp brings Pulsoid with Discord Rich Presence and an in-app dashboard with an OBS-friendly overlay.",
+      "synopsis": "HRMAPP with Discord RPC and overlay dashboard",
+      "description": "HRMApp brings Pulsoid with Discord Rich Presence and an in-app dashboard with an OBS-friendly overlay.",
       "files": [
         "main.js",
         "preload.js",
@@ -96,29 +101,43 @@
         "node_modules/**/*"
       ],
       "target": [
-        "deb",
-        "AppImage"
+        {
+          "target": "deb",
+          "arch": "x64"
+        },
+        {
+          "target": "deb",
+          "arch": "arm64"
+        },
+        {
+          "target": "deb",
+          "arch": "armv7l"
+        },
+        {
+          "target": "snap",
+          "arch": "x64"
+        },
+        {
+          "target": "snap",
+          "arch": "arm64"
+        },
+        {
+          "target": "snap",
+          "arch": "armv7l"
+        }
       ]
     },
-    "deb": {
-      "priority": "optional",
-      "depends": [
-        "libgtk-3-0",
-        "libnss3",
-        "libxss1",
-        "libasound2",
-        "libatk-bridge2.0-0",
-        "libdrm2",
-        "libgbm1"
-      ],
-      "afterInstall": "build/deb-after-install.sh",
-      "afterRemove": "build/deb-after-remove.sh"
-    },
     "snap": {
+      "useTemplateApp": false,
       "confinement": "strict",
       "grade": "stable",
-      "summary": "PulsoidApp integrates Pulsoid with Discord RPC, a dashboard app for OBS.",
-      "description": "PulsoidApp is used with Pulsoid, offering OBS overlays, Discord RPC integration, and easy usage within a single application.",
+      "summary": "HRMApp integrates Pulsoid with Discord RPC, a dashboard app for OBS.",
+      "description": "HRMApp is used with Pulsoid, offering OBS overlays, Discord RPC integration, and easy usage within a single application.",
+      "environment": {
+        "LD_LIBRARY_PATH": "$SNAP/usr/lib:$SNAP/usr/local/lib",
+        "DISCORD_RPC_ENABLE": "1",
+        "ELECTRON_DISABLE_SECURITY_WARNINGS": "1"
+      },
       "plugs": [
         "network",
         "x11",
@@ -130,11 +149,22 @@
         "system-observe",
         "desktop",
         "desktop-legacy"
+      ]
+    },
+    "deb": {
+      "category": "Utility",
+      "fpm": [
+        "--deb-no-default-config-files"
       ],
-      "environment": {
-        "DISCORD_RPC_ENABLE": "1",
-        "ELECTRON_DISABLE_SECURITY_WARNINGS": "1"
-      }
+      "depends": [
+        "libgtk-3-0",
+        "libnss3",
+        "libxss1",
+        "libasound2",
+        "libatk-bridge2.0-0",
+        "libdrm2",
+        "libgbm1"
+      ]
     }
   },
   "nsis": {
@@ -143,6 +173,7 @@
     "oneClick": false
   },
   "dependencies": {
+    "bindings": "^1.5.0",
     "discord-rpc": "^4.0.1",
     "electron-store": "^7.0.3",
     "ws": "^8.18.0"
