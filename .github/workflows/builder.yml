@@ -50,10 +50,10 @@ jobs:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
         with:
           version: ${{ env.VERSION }}
-          name: "PulsoidApp ${{ env.VERSION }}"
+          name: "HRMApp ${{ env.VERSION }}"
           tag: ${{ env.VERSION }}
           prerelease: true
-          header: "## Release Notes for PulsoidApp ${{ env.VERSION }}"
+          header: "## Release Notes for HRMApp ${{ env.VERSION }}"
 
       - name: Save release notes to file
         run: |
@@ -119,10 +119,10 @@ jobs:
         shell: pwsh
         run: |
           $base = "${{ env.PUBLIC_BASE_URL }}/${{ env.VERSION }}${{ env.BUILD_TAG }}"
-          $msi = Test-Path "dist/PulsoidApp-Setup-${{ env.VERSION }}.msi"
-          $exe = Test-Path "dist/PulsoidApp-Setup-${{ env.VERSION }}.exe"
-          if ($msi) { "WIN_MSI_URL=$base/PulsoidApp-Setup-${{ env.VERSION }}.msi" | Out-File -FilePath $env:GITHUB_OUTPUT -Append -Encoding utf8 }
-          if ($exe) { "WIN_EXE_URL=$base/PulsoidApp-Setup-${{ env.VERSION }}.exe" | Out-File -FilePath $env:GITHUB_OUTPUT -Append -Encoding utf8 }
+          $msi = Test-Path "dist/HRMApp-Setup-${{ env.VERSION }}.msi"
+          $exe = Test-Path "dist/HRMApp-Setup-${{ env.VERSION }}.exe"
+          if ($msi) { "WIN_MSI_URL=$base/HRMApp-Setup-${{ env.VERSION }}.msi" | Out-File -FilePath $env:GITHUB_OUTPUT -Append -Encoding utf8 }
+          if ($exe) { "WIN_EXE_URL=$base/HRMApp-Setup-${{ env.VERSION }}.exe" | Out-File -FilePath $env:GITHUB_OUTPUT -Append -Encoding utf8 }
 
   build-linux:
     name: Build & Upload — Linux (x64)
@@ -423,7 +423,7 @@ jobs:
             --arg desc "${RELEASE_NOTES}\n\n**Downloads**:${downloads}" \
             --arg avatar "https://cdn.discordapp.com/icons/1274732053337870417/8f0b3c1852bbd3cc11a237c2d326dcb1.webp?size=1024" \
             '{
-              username: "Pulsoid APP Bot",
+              username: "HRMApp Bot",
               avatar_url: $avatar,
               content: $content,
               embeds: [{
