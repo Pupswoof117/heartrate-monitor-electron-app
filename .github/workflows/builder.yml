@@ -153,7 +153,7 @@ jobs:
           sudo apt-get install -y libfuse2 jq
 
       - name: Build Electron App (Linux x64)
-        run: npm run build:linux
+        run: npm run build:linux:x64
         env:
           GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
 
@@ -223,7 +223,7 @@ jobs:
           sudo apt-get install -y libfuse2 jq
 
       - name: Build Electron App (Raspberry Pi)
-        run: npm run build:pi
+        run: npm run build:linux:arm64 && npm run build:linux:armv7l
         env:
           GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
 
@@ -269,75 +269,76 @@ jobs:
           [ -n "$APPIMG_ARM64" ] && echo "ARM64_APPIMG_URL=$BASE/$APPIMG_ARM64" >> $GITHUB_OUTPUT
           [ -n "$DEB_ARM64" ] && echo "ARM64_DEB_URL=$BASE/$DEB_ARM64" >> $GITHUB_OUTPUT
 
-  build-macos:
-    name: Build & Upload — macOS
-    runs-on: macos-latest
-    needs: prepare
-    env:
-      VERSION: ${{ needs.prepare.outputs.version }}
-      BUILD_TAG: ${{ needs.prepare.outputs.build_tag }}
-    outputs:
-      MAC_DMG_URL: ${{ steps.links.outputs.MAC_DMG_URL }}
-      MAC_ZIP_URL: ${{ steps.links.outputs.MAC_ZIP_URL }}
-    steps:
-      - name: Checkout
-        uses: actions/checkout@v4
-
-      - name: Setup Node.js
-        uses: actions/setup-node@v4
-        with:
-          node-version: 21
-          cache: 'npm'
-
-      - name: Install Dependencies
-        run: npm ci
-
-      - name: Build Electron App (macOS)
-        run: npm run build:mac
-        env:
-          GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
-          # Add Apple notarization vars if you have them; otherwise unsigned DMG/zip will still build.
-
-      - name: List dist/
-        run: ls -R dist
-
-      - name: Install mc (MinIO Client) on macOS
-        run: |
-          ARCH=$(uname -m)
-          if [ "$ARCH" = "arm64" ]; then
-            URL="https://dl.min.io/client/mc/release/darwin-arm64/mc"
-          else
-            URL="https://dl.min.io/client/mc/release/darwin-amd64/mc"
-          fi
-          curl -L "$URL" -o mc
-          chmod +x mc
-          ./mc --version
-
-      - name: Configure mc alias
-        run: |
-          ./mc alias set myminio "${{ secrets.MINIO_ENDPOINT }}" "${{ secrets.AWS_ACCESS_KEY }}" "${{ secrets.AWS_SECRET_KEY }}"
-
-      - name: Upload macOS Artifacts
-        env:
-          TARGET_PREFIX: ${{ env.MINIO_BUCKET_PATH }}/${{ env.VERSION }}${{ env.BUILD_TAG }}/
-        run: |
-          set -e
-          DMG=$(ls dist/*.dmg 2>/dev/null | head -n1 || true)
-          ZIP=$(ls dist/*.zip 2>/dev/null | head -n1 || true)
-          for f in "$DMG" "$ZIP"; do
-            if [ -n "$f" ] && [ -f "$f" ]; then
-              ./mc cp "$f" "$TARGET_PREFIX"
-            fi
-          done
-
-      - name: Compose Download Links (macOS)
-        id: links
-        run: |
-          BASE="${{ env.PUBLIC_BASE_URL }}/${{ env.VERSION }}${{ env.BUILD_TAG }}"
-          DMG=$(ls dist/*.dmg 2>/dev/null | xargs -n1 -I{} basename "{}" | head -n1 || echo "")
-          ZIP=$(ls dist/*.zip 2>/dev/null | xargs -n1 -I{} basename "{}" | head -n1 || echo "")
-          [ -n "$DMG" ] && echo "MAC_DMG_URL=$BASE/$DMG" >> $GITHUB_OUTPUT
-          [ -n "$ZIP" ] && echo "MAC_ZIP_URL=$BASE/$ZIP" >> $GITHUB_OUTPUT
+  #build-macos:
+  #  name: Build & Upload — macOS
+  #  runs-on: macos-latest
+  #  needs: prepare
+  #  env:
+  #    VERSION: ${{ needs.prepare.outputs.version }}
+  #    BUILD_TAG: ${{ needs.prepare.outputs.build_tag }}
+  #  outputs:
+  #    MAC_DMG_URL: ${{ steps.links.outputs.MAC_DMG_URL }}
+  #    MAC_ZIP_URL: ${{ steps.links.outputs.MAC_ZIP_URL }}
+  #  steps:
+  #    - name: Checkout
+  #      uses: actions/checkout@v4
+  #
+  #    - name: Setup Node.js
+  #      uses: actions/setup-node@v4
+  #      with:
+  #        node-version: 21
+  #        cache: 'npm'
+  #
+  #
+  #    - name: Install Dependencies
+  #      run: npm ci
+  #
+  #    - name: Build Electron App (macOS)
+  #      run: npm run build:mac
+  #      env:
+  #        GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+  #        # Add Apple notarization vars if you have them; otherwise unsigned DMG/zip will still build.
+  #
+  #    - name: List dist/
+  #      run: ls -R dist
+  #
+  #    - name: Install mc (MinIO Client) on macOS
+  #      run: |
+  #        ARCH=$(uname -m)
+  #        if [ "$ARCH" = "arm64" ]; then
+  #          URL="https://dl.min.io/client/mc/release/darwin-arm64/mc"
+  #        else
+  #          URL="https://dl.min.io/client/mc/release/darwin-amd64/mc"
+  #        fi
+  #        curl -L "$URL" -o mc
+  #        chmod +x mc
+  #        ./mc --version
+  #
+  #    - name: Configure mc alias
+  #      run: |
+  #        ./mc alias set myminio "${{ secrets.MINIO_ENDPOINT }}" "${{ secrets.AWS_ACCESS_KEY }}" "${{ secrets.AWS_SECRET_KEY }}"
+  #
+  #    - name: Upload macOS Artifacts
+  #      env:
+  #        TARGET_PREFIX: ${{ env.MINIO_BUCKET_PATH }}/${{ env.VERSION }}${{ env.BUILD_TAG }}/
+  #      run: |
+  #        set -e
+  #        DMG=$(ls dist/*.dmg 2>/dev/null | head -n1 || true)
+  #        ZIP=$(ls dist/*.zip 2>/dev/null | head -n1 || true)
+  #        for f in "$DMG" "$ZIP"; do
+  #          if [ -n "$f" ] && [ -f "$f" ]; then
+  #            ./mc cp "$f" "$TARGET_PREFIX"
+  #          fi
+  #        done
+  #
+  #    - name: Compose Download Links (macOS)
+  #      id: links
+  #      run: |
+  #        BASE="${{ env.PUBLIC_BASE_URL }}/${{ env.VERSION }}${{ env.BUILD_TAG }}"
+  #        DMG=$(ls dist/*.dmg 2>/dev/null | xargs -n1 -I{} basename "{}" | head -n1 || echo "")
+  #        ZIP=$(ls dist/*.zip 2>/dev/null | xargs -n1 -I{} basename "{}" | head -n1 || echo "")
+  #        [ -n "$DMG" ] && echo "MAC_DMG_URL=$BASE/$DMG" >> $GITHUB_OUTPUT
+  #        [ -n "$ZIP" ] && echo "MAC_ZIP_URL=$BASE/$ZIP" >> $GITHUB_OUTPUT
 
   notify:
     name: Upload notes + Send ONE Discord message
