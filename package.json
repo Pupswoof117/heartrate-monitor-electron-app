@@ -26,7 +26,7 @@
   "build": {
     "copyright": "Copyright © 2024-2025 NekoSuneVR",
     "appId": "com.nekosunevr.pulsoidapp",
-    "productName": "PulsoidApp",
+    "productName": "HRMApp",
     "asar": true,
     "files": [
       "!node_modules/.cache",
@@ -34,7 +34,7 @@
     ],
     "appx": {
       "backgroundColor": "#ffffff",
-      "displayName": "PulsoidApp",
+      "displayName": "HRMApp",
       "publisher": "CN=NekoSuneVR",
       "publisherDisplayName": "NekoSuneVR",
       "identityName": "com.nekosunevr.pulsoidapp"
@@ -152,20 +152,20 @@
       ]
     },
     "deb": {
-    "category": "Utility",
+      "category": "Utility",
       "fpm": [
         "--deb-no-default-config-files"
       ],
-    "depends": [
-      "libgtk-3-0",
-      "libnss3",
-      "libxss1",
-      "libasound2",
-      "libatk-bridge2.0-0",
-      "libdrm2",
-      "libgbm1"
-    ]
-   }
+      "depends": [
+        "libgtk-3-0",
+        "libnss3",
+        "libxss1",
+        "libasound2",
+        "libatk-bridge2.0-0",
+        "libdrm2",
+        "libgbm1"
+      ]
+    }
   },
   "nsis": {
     "allowToChangeInstallationDirectory": true,
@@ -173,6 +173,7 @@
     "oneClick": false
   },
   "dependencies": {
+    "bindings": "^1.5.0",
     "discord-rpc": "^4.0.1",
     "electron-store": "^7.0.3",
     "ws": "^8.18.0"
