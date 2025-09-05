@@ -112,18 +112,18 @@ jobs:
         shell: powershell
         run: |
           $targetPath = "${{ env.MINIO_BUCKET_PATH }}/${{ env.VERSION }}${{ env.BUILD_TAG }}/"
-          if (Test-Path "dist/PulsoidApp-Setup-${{ env.VERSION }}.msi") { .\mc.exe cp "dist/PulsoidApp-Setup-${{ env.VERSION }}.msi" "$targetPath" }
-          if (Test-Path "dist/PulsoidApp-Setup-${{ env.VERSION }}.exe") { .\mc.exe cp "dist/PulsoidApp-Setup-${{ env.VERSION }}.exe" "$targetPath" }
+          if (Test-Path "dist/HRMApp-Setup-${{ env.VERSION }}.msi") { .\mc.exe cp "dist/HRMApp-Setup-${{ env.VERSION }}.msi" "$targetPath" }
+          if (Test-Path "dist/HRMApp-Setup-${{ env.VERSION }}.exe") { .\mc.exe cp "dist/HRMApp-Setup-${{ env.VERSION }}.exe" "$targetPath" }
 
       - name: Make Windows Download Links
         id: links
         shell: pwsh
         run: |
           $base = "${{ env.PUBLIC_BASE_URL }}/${{ env.VERSION }}${{ env.BUILD_TAG }}"
-          $msi = Test-Path "dist/PulsoidApp-Setup-${{ env.VERSION }}.msi"
-          $exe = Test-Path "dist/PulsoidApp-Setup-${{ env.VERSION }}.exe"
-          if ($msi) { "WIN_MSI_URL=$base/PulsoidApp-Setup-${{ env.VERSION }}.msi" | Out-File -FilePath $env:GITHUB_OUTPUT -Append -Encoding utf8 }
-          if ($exe) { "WIN_EXE_URL=$base/PulsoidApp-Setup-${{ env.VERSION }}.exe" | Out-File -FilePath $env:GITHUB_OUTPUT -Append -Encoding utf8 }
+          $msi = Test-Path "dist/HRMApp-Setup-${{ env.VERSION }}.msi"
+          $exe = Test-Path "dist/HRMApp-Setup-${{ env.VERSION }}.exe"
+          if ($msi) { "WIN_MSI_URL=$base/HRMApp-Setup-${{ env.VERSION }}.msi" | Out-File -FilePath $env:GITHUB_OUTPUT -Append -Encoding utf8 }
+          if ($exe) { "WIN_EXE_URL=$base/HRMApp-Setup-${{ env.VERSION }}.exe" | Out-File -FilePath $env:GITHUB_OUTPUT -Append -Encoding utf8 }
 
   linux-x64:
     name: Build & Upload — Linux (x64)
