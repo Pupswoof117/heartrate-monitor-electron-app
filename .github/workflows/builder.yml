@@ -348,7 +348,7 @@ jobs:
       - build-windows
       - build-linux
       - build-raspi
-      - build-macos
+      #- build-macos
     env:
       VERSION: ${{ needs.prepare.outputs.version }}
       BUILD_TAG: ${{ needs.prepare.outputs.build_tag }}
