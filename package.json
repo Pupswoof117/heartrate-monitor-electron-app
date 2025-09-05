@@ -1,5 +1,5 @@
 {
-  "name": "nekosune-pulsoid-electron-app-crossplatform",
+  "name": "nekosune-hrmapp",
   "homepage": "https://github.com/NekoSuneProjects/pulsoid-electron-app",
   "version": "1.0.0",
   "author": {
@@ -7,7 +7,7 @@
     "email": "nekosunevr@hyperiontv.net"
   },
   "license": "MIT",
-  "description": "NekoSune PulsoidApp is Program use Pulsoid With Discord RPC and Dashboard on App with Overlay can use on OBS",
+  "description": "HRMApp is Program use Pulsoid With Discord RPC and Dashboard on App with Overlay can use on OBS",
   "main": "main.js",
   "scripts": {
     "start": "electron .",
@@ -25,7 +25,7 @@
   },
   "build": {
     "copyright": "Copyright © 2024-2025 NekoSuneVR",
-    "appId": "com.nekosunevr.pulsoidapp",
+    "appId": "com.nekosunevr.nekosunehrmapp",
     "productName": "HRMApp",
     "asar": true,
     "files": [
@@ -37,7 +37,7 @@
       "displayName": "HRMApp",
       "publisher": "CN=NekoSuneVR",
       "publisherDisplayName": "NekoSuneVR",
-      "identityName": "com.nekosunevr.pulsoidapp"
+      "identityName": "com.nekosunevr.nekosunehrmapp"
     },
     "directories": {
       "output": "dist/${os}-${arch}",
@@ -87,8 +87,8 @@
       "category": "Utility",
       "maintainer": "NekoSuneVR",
       "icon": "assets/icon.png",
-      "synopsis": "Pulsoid with Discord RPC and overlay dashboard",
-      "description": "PulsoidApp brings Pulsoid with Discord Rich Presence and an in-app dashboard with an OBS-friendly overlay.",
+      "synopsis": "HRMAPP with Discord RPC and overlay dashboard",
+      "description": "HRMApp brings Pulsoid with Discord Rich Presence and an in-app dashboard with an OBS-friendly overlay.",
       "files": [
         "main.js",
         "preload.js",
@@ -131,8 +131,8 @@
       "useTemplateApp": false,
       "confinement": "strict",
       "grade": "stable",
-      "summary": "PulsoidApp integrates Pulsoid with Discord RPC, a dashboard app for OBS.",
-      "description": "PulsoidApp is used with Pulsoid, offering OBS overlays, Discord RPC integration, and easy usage within a single application.",
+      "summary": "HRMApp integrates Pulsoid with Discord RPC, a dashboard app for OBS.",
+      "description": "HRMApp is used with Pulsoid, offering OBS overlays, Discord RPC integration, and easy usage within a single application.",
       "environment": {
         "LD_LIBRARY_PATH": "$SNAP/usr/lib:$SNAP/usr/local/lib",
         "DISCORD_RPC_ENABLE": "1",
