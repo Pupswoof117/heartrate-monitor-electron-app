@@ -1,67 +1,163 @@
 {
-    "name": "pulsoid-electron",
-    "version": "1.0.0",
-    "author": "NekoSuneVR",
-    "license": "MIT",
-    "description": "PulsoidApp is Program use Pulsoid With Discord RPC and Dashboard on App with Overlay can use on OBS",
-    "main": "main.js",
-    "scripts": {
-        "start": "electron .",
-        "build": "electron-builder",
-        "build:win": "electron-builder --win",
-        "test": "echo \"Error: no test specified\" && exit 1"
+  "name": "nekosune-hrmapp",
+  "homepage": "https://github.com/NekoSuneProjects/nekosune-hrmapp",
+  "version": "1.0.0",
+  "author": {
+    "name": "NekoSuneVR",
+    "email": "nekosunevr@hyperiontv.net"
+  },
+  "license": "MIT",
+  "description": "HRMApp is Program use Pulsoid With Discord RPC and Dashboard on App with Overlay can use on OBS",
+  "main": "main.js",
+  "scripts": {
+    "start": "electron .",
+    "build": "electron-builder",
+    "build:win": "electron-builder --win --publish=never",
+    "build:mac": "electron-builder --mac --publish=never",
+    "build:linux:x64": "electron-builder -l AppImage deb --x64 --publish=never",
+    "build:linux:arm64": "electron-builder -l AppImage --arm64 --publish=never",
+    "build:linux:armv7l": "electron-builder -l AppImage --armv7l --publish=never",
+    "build:linux:all": "npm run build:linux:x64 && npm run build:linux:arm64 && npm run build:linux:armv7l",
+    "build:snap:x64": "electron-builder --linux snap --x64 --publish=never",
+    "build:snap:arm64": "electron-builder --linux snap --arm64 --publish=never",
+    "build:snap:armv7l": "electron-builder --linux snap --armv7l --publish=never",
+    "build:snap:all": "npm run build:snap:x64 && npm run build:snap:arm64 && npm run build:snap:armv7l"
+  },
+  "build": {
+    "copyright": "Copyright © 2024-2025 NekoSuneVR",
+    "appId": "com.nekosunevr.nekosunehrmapp",
+    "productName": "HRMApp",
+    "asar": true,
+    "files": [
+      "!node_modules/.cache",
+      "!dist/**"
+    ],
+    "appx": {
+      "backgroundColor": "#ffffff",
+      "displayName": "HRMApp",
+      "publisher": "CN=NekoSuneVR",
+      "publisherDisplayName": "NekoSuneVR",
+      "identityName": "com.nekosunevr.nekosunehrmapp"
     },
-    "build": {
-        "copyright": "Copyright © 2024-2025 NekoSuneVR",
-        "appId": "com.nekosunevr.pulsoidapp",
-        "productName": "HRMApp",
-        "appx": {
-            "backgroundColor": "#ffffff",
-            "displayName": "HRMApp",
-            "publisher": "CN=NekoSuneVR",
-            "publisherDisplayName": "NekoSuneVR",
-            "identityName": "com.nekosunevr.pulsoidapp"
-        },
-        "directories": {
-            "output": "dist",
-            "buildResources": "assets"
-        },
-        "files": [
-            "**/*",
-            "!node_modules/.cache"
-        ],
-        "win": {
-            "artifactName": "${productName}-Setup-${version}.${ext}",
-            "target": [
-                "nsis",
-                "msi"
-            ],
-            "icon": "assets/icon.ico",
-            "files": [
-                "main.js",
-                "preload.js",
-                "LICENSE",
-                "README.md",
-                "CHANGELOG.md",
-                "assets/**/*",
-                "src/**/*",
-                "package.json",
-                "node_modules/**/*"
-            ]
-        },
-        "nsis": {
-            "allowToChangeInstallationDirectory": true,
-            "license": "LICENSE",
-            "oneClick": false
-        }
+    "directories": {
+      "output": "dist/${os}-${arch}",
+      "buildResources": "assets"
     },
-    "dependencies": {
-        "discord-rpc": "^4.0.1",
-        "electron-store": "^7.0.3",
-        "ws": "^8.18.0"
+    "win": {
+      "artifactName": "${productName}-Setup-${version}.${ext}",
+      "target": [
+        "nsis",
+        "msi"
+      ],
+      "icon": "assets/icon.ico",
+      "files": [
+        "main.js",
+        "preload.js",
+        "LICENSE",
+        "README.md",
+        "CHANGELOG.md",
+        "assets/**/*",
+        "src/**/*",
+        "package.json",
+        "node_modules/**/*"
+      ]
     },
-    "devDependencies": {
-        "electron": "^30.0.0",
-        "electron-builder": "^25.1.8"
+    "mac": {
+      "artifactName": "${productName}-Setup-${version}.${ext}",
+      "target": [
+        "dmg",
+        "zip"
+      ],
+      "category": "public.app-category.healthcare-fitness",
+      "icon": "assets/icon.icns",
+      "files": [
+        "main.js",
+        "preload.js",
+        "LICENSE",
+        "README.md",
+        "CHANGELOG.md",
+        "assets/**/*",
+        "src/**/*",
+        "package.json",
+        "node_modules/**/*"
+      ]
+    },
+    "linux": {
+      "artifactName": "${productName}-${version}-${arch}.${ext}",
+      "category": "Utility",
+      "maintainer": "NekoSuneVR",
+      "icon": "assets/icon.png",
+      "synopsis": "HRMAPP with Discord RPC and overlay dashboard",
+      "description": "HRMApp brings Pulsoid with Discord Rich Presence and an in-app dashboard with an OBS-friendly overlay.",
+      "files": [
+        "main.js",
+        "preload.js",
+        "LICENSE",
+        "README.md",
+        "CHANGELOG.md",
+        "assets/**/*",
+        "src/**/*",
+        "package.json",
+        "node_modules/**/*"
+      ],
+      "target": [
+        "deb",
+        "AppImage"
+      ]
+    },
+    "snap": {
+      "useTemplateApp": false,
+      "confinement": "strict",
+      "grade": "stable",
+      "summary": "HRMApp integrates Pulsoid with Discord RPC, a dashboard app for OBS.",
+      "description": "HRMApp is used with Pulsoid, offering OBS overlays, Discord RPC integration, and easy usage within a single application.",
+      "environment": {
+        "LD_LIBRARY_PATH": "$SNAP/usr/lib:$SNAP/usr/local/lib",
+        "DISCORD_RPC_ENABLE": "1",
+        "ELECTRON_DISABLE_SECURITY_WARNINGS": "1"
+      },
+      "plugs": [
+        "network",
+        "x11",
+        "wayland",
+        "unity7",
+        "pulseaudio",
+        "home",
+        "process-control",
+        "system-observe",
+        "desktop",
+        "desktop-legacy"
+      ]
+    },
+    "deb": {
+      "category": "Utility",
+      "fpm": [
+        "--deb-no-default-config-files"
+      ],
+      "depends": [
+        "libgtk-3-0",
+        "libnss3",
+        "libxss1",
+        "libasound2",
+        "libatk-bridge2.0-0",
+        "libdrm2",
+        "libgbm1"
+      ]
     }
+  },
+  "nsis": {
+    "allowToChangeInstallationDirectory": true,
+    "license": "LICENSE",
+    "oneClick": false
+  },
+  "dependencies": {
+    "bindings": "^1.5.0",
+    "discord-rpc": "^4.0.1",
+    "electron-store": "^7.0.3",
+    "ws": "^8.18.0"
+  },
+  "devDependencies": {
+    "electron": "^30.0.0",
+    "electron-builder": "^25.1.8"
+  }
 }
