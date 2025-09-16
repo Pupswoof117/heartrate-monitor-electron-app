@@ -25,6 +25,6 @@ Open **Settings** inside the app:
 - The live chart is capped to the latest ~120 points
 
 
-###
+### REMINDER
 
-REMINDER - Releases (from Pups) are [here](https://webpoweredlab.com/hrmonitor/)
+ - Releases (from Pups) are [here](https://webpoweredlab.com/hrmonitor/)
