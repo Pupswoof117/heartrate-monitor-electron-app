@@ -23,3 +23,8 @@ Open **Settings** inside the app:
 - Settings are saved locally via `electron-store` and loaded at startup
 - Discord RPC requires the **Discord desktop** client running on the same machine
 - The live chart is capped to the latest ~120 points
+
+
+###
+
+REMINDER - Releases (from Pups) are [here](https://webpoweredlab.com/hrmonitor/)
